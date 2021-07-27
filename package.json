@@ -62,6 +62,7 @@
     "@types/chai": "^4.2.20",
     "@types/mocha": "^8.2.3",
     "@types/node": "^12.20.16",
+    "@types/ws": "^7.4.7",
     "@typescript-eslint/eslint-plugin": "^4.28.2",
     "@typescript-eslint/parser": "^4.28.2",
     "chai": "^4.2.0",
