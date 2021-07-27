@@ -30,21 +30,74 @@ npm install @openhps/mqtt --save
 ```
 
 ## Usage
+The MQTT module uses a broker for all communication. You can use the embedded MQTT server or use an external broker.
 
 ### Embedded MQTT Server
+```typescript
+ModelBuilder.create()
+    .addService(new MQTTServer({
+        port: 1443          // MQTT port
+    }))
+    .from(new MQTTSourceNode({
+        uid: "source"
+    }))
+    .to()
+    .build();
+```
 
 ### Client Example
+```typescript
+ModelBuilder.create()
+    .addService(new MQTTClient({
+        url: "mqtt://localhost:1443",
+    }))
+    .from(/* ... */)
+    .to(new MQTTSinkNode({
+        uid: "source"
+    }))
+    .build();
+```
 
 ### External MQTT Server
 You can set up multiple clients connecting to an external MQTT server.
 The API is exactly the same as the client example.
 
-### Client Authentication
-
-### Server Authentication
-
 ## Protocol
 
+|**Topic**|**Description**|
+|-|-|
+|\<uid\>/push|Topic to push to a node with a certain \<uid\>|
+|\<uid\>/pull|Topic to pull from a node with a certain \<uid\>|
+|\<uid\>/events/error|Topic to publish errors to a node with a certain \<uid\>|
+|\<uid\>/events/completed|Topic to publish completed event to a node with a certain \<uid\>|
+
+### Push Payload
+```json
+{
+    "frame": {
+        // ...
+    },
+    "options": {
+        // ...
+    }
+}
+```
+
+### Pull Payload
+```json
+{
+    "options": {
+        // ...
+    }
+}
+```
+
+### Event Payload
+```json
+{
+    // ...
+}
+```
 
 ## Contributors
 The framework is open source and is mainly developed by PhD Student Maxim Van de Wynckel as part of his research towards *Hybrid Positioning and Implicit Human-Computer Interaction* under the supervision of Prof. Dr. Beat Signer.
