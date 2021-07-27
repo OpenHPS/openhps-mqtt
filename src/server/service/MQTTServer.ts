@@ -1,5 +1,5 @@
-import { DataFrame, DataSerializer, Node, PullOptions, PushOptions } from '@openhps/core';
-import { Aedes, AedesPublishPacket } from 'aedes';
+import { DataFrame, DataSerializer, PullOptions, PushOptions } from '@openhps/core';
+import { Aedes } from 'aedes';
 import * as aedes from 'aedes';
 import { createServer, Server } from 'net';
 import { createServer as createSecureServer } from 'tls';
