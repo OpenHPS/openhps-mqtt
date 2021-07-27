@@ -1,6 +1,6 @@
 import { DataFrame, DataSerializer, Node, PullOptions, PushOptions } from '@openhps/core';
 import { Aedes, AedesPublishPacket } from 'aedes';
-import * as aedes from 'aedes'
+import * as aedes from 'aedes';
 import { createServer, Server } from 'net';
 import { createServer as createSecureServer } from 'tls';
 import { MQTTServerOptions } from './MQTTServerOptions';
@@ -24,15 +24,38 @@ export class MQTTServer extends MQTTClient {
                 port: 1883,
             }),
         };
-        this.options.url = `localhost:${options.port}`;
+        this.options.url = `mqtt://localhost:${options.port}`;
 
-        this.on('build', this._onInitServer.bind(this));
-        this.on('destroy', this._onDestroy.bind(this));
+        this.removeAllListeners('build');
+        this.once('build', this._onInitServer.bind(this));
+        this.once('destroy', this._onDestroy.bind(this));
     }
 
     private _onInitServer(): Promise<void> {
-        return new Promise((resolve) => {
-            this.aedes = (aedes as any)(this.options);
+        return new Promise((resolve, reject) => {
+            const brokerId = 'BROKER_' + process.pid;
+            this.aedes = (aedes as any)({
+                id: brokerId,
+                ...this.options,
+            });
+            this.aedes.on('subscribe', (subscriptions, client) => {
+                this.model.logger(
+                    'info',
+                    'MQTT client \x1b[32m' +
+                        (client ? client.id : client) +
+                        '\x1b[0m subscribed to topics: ' +
+                        subscriptions.map((s) => s.topic).join('\n') +
+                        ' from broker ' +
+                        brokerId,
+                );
+            });
+            this.aedes.on('client', (client) => {
+                this.model.logger(
+                    'info',
+                    'Client Connected: \x1b[33m' + (client ? client.id : client) + '\x1b[0m' + ' to broker ' + brokerId,
+                );
+            });
+
             if (this.options.tls) {
                 this.server = createSecureServer(
                     {
@@ -46,20 +69,32 @@ export class MQTTServer extends MQTTClient {
             }
             // Create websocket server
             if (this.options.websocket) {
-                (createWebsocketServer as any)({
-                    server: this.server
-                }, this.aedes.handle);
+                (createWebsocketServer as any)(
+                    {
+                        server: this.server,
+                    },
+                    this.aedes.handle,
+                );
             }
             this.server.listen(this.options.port, () => {
-                resolve();
+                this.connect()
+                    .then(() => {
+                        resolve();
+                    })
+                    .catch(reject);
             });
         });
     }
 
     private _onDestroy(): Promise<void> {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             this.aedes.close(() => {
-                resolve();
+                this.server.close((err?) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    resolve();
+                });
             });
         });
     }
@@ -71,7 +106,7 @@ export class MQTTServer extends MQTTClient {
      * @param {DataFrame} frame Data frame to push
      * @param {PushOptions} [options] Push options
      */
-    public push<T extends DataFrame | DataFrame[]>(uid: string, frame: T, options?: PushOptions): Promise<void> {
+    public remotePush<T extends DataFrame | DataFrame[]>(uid: string, frame: T, options?: PushOptions): Promise<void> {
         return new Promise((resolve, reject) => {
             this.aedes.publish(
                 {
@@ -101,7 +136,7 @@ export class MQTTServer extends MQTTClient {
      * @param {string} uid Remote Node UID
      * @param {PullOptions} [options] Pull options
      */
-    public pull(uid: string, options?: PullOptions): Promise<void> {
+    public remotePull(uid: string, options?: PullOptions): Promise<void> {
         return new Promise((resolve, reject) => {
             this.aedes.publish(
                 {
@@ -131,7 +166,7 @@ export class MQTTServer extends MQTTClient {
      * @param {string} event Event name
      * @param {any} arg Args
      */
-    public sendEvent(uid: string, event: string, arg: any): Promise<void> {
+    public remoteEvent(uid: string, event: string, arg: any): Promise<void> {
         return new Promise((resolve, reject) => {
             this.aedes.publish(
                 {
@@ -150,55 +185,5 @@ export class MQTTServer extends MQTTClient {
                 },
             );
         });
-    }
-
-    /**
-     * Register a node as a remotely available node
-     *
-     * @param {Node<any, any>} node Node to register
-     * @returns {boolean} Registration success
-     */
-    public registerNode(node: Node<any, any>): boolean {
-        // Subscribe to all endpoints for the node
-        this.aedes.subscribe(
-            `${node.uid}/push`,
-            (packet: AedesPublishPacket, callback: () => void) => {
-                const payload = JSON.parse(packet.payload as string);
-                this.onLocalPush(node.uid, payload.frame, payload.options);
-                callback();
-            },
-            () => undefined,
-        );
-        this.aedes.subscribe(
-            `${node.uid}/pull`,
-            (packet: AedesPublishPacket, callback: () => void) => {
-                const payload = JSON.parse(packet.payload as string);
-                this.onLocalPull(node.uid, payload.options);
-                callback();
-            },
-            () => undefined,
-        );
-        this.aedes.subscribe(
-            `${node.uid}/events/completed`,
-            (packet: AedesPublishPacket, callback: () => void) => {
-                const payload = JSON.parse(packet.payload as string);
-                this.onLocalEvent(node.uid, 'completed', payload);
-                callback();
-            },
-            () => undefined,
-        );
-        this.aedes.subscribe(
-            `${node.uid}/events/error`,
-            (packet: AedesPublishPacket, callback: () => void) => {
-                const payload = JSON.parse(packet.payload as string);
-                this.onLocalEvent(node.uid, 'error', payload);
-                callback();
-            },
-            () => undefined,
-        );
-        this.logger('debug', {
-            message: `Registered remote server node ${node.uid}`,
-        });
-        return super.registerNode(node);
     }
 }

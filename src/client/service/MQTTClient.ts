@@ -10,19 +10,19 @@ export class MQTTClient extends RemoteNodeService {
         super();
         this.options = options;
 
-        this.on('build', this._onConnect.bind(this));
-        this.on('destroy', this._onDisconnect.bind(this));
+        this.once('build', this.connect.bind(this));
+        this.once('destroy', this.disconnect.bind(this));
     }
 
-    private _onConnect(): Promise<void> {
+    protected connect(): Promise<void> {
         return new Promise((resolve) => {
             this.client = connect(this.options.url, {});
-            console.log("ready")
+            this.client.on('message', this._onMessage.bind(this));
             resolve();
         });
     }
 
-    private _onDisconnect(): Promise<void> {
+    protected disconnect(): Promise<void> {
         return new Promise((resolve) => {
             this.client.end();
             resolve();
@@ -36,7 +36,7 @@ export class MQTTClient extends RemoteNodeService {
      * @param {DataFrame} frame Data frame to push
      * @param {PushOptions} [options] Push options
      */
-    public push<T extends DataFrame | DataFrame[]>(uid: string, frame: T, options?: PushOptions): Promise<void> {
+    public remotePush<T extends DataFrame | DataFrame[]>(uid: string, frame: T, options?: PushOptions): Promise<void> {
         return new Promise((resolve) => {
             this.client.publish(
                 `${uid}/push`,
@@ -59,7 +59,7 @@ export class MQTTClient extends RemoteNodeService {
      * @param {string} uid Remote Node UID
      * @param {PullOptions} [options] Pull options
      */
-    public pull(uid: string, options?: PullOptions): Promise<void> {
+    public remotePull(uid: string, options?: PullOptions): Promise<void> {
         return new Promise((resolve) => {
             this.client.publish(
                 `${uid}/pull`,
@@ -82,7 +82,7 @@ export class MQTTClient extends RemoteNodeService {
      * @param {string} event Event name
      * @param {any} arg Args
      */
-    public sendEvent(uid: string, event: string, arg: any): Promise<void> {
+    public remoteEvent(uid: string, event: string, arg: any): Promise<void> {
         return new Promise((resolve) => {
             this.client.publish(`${uid}/events/${event}`, JSON.stringify(arg), {
                 qos: this.options.qos,
@@ -100,15 +100,15 @@ export class MQTTClient extends RemoteNodeService {
         switch (action) {
             case 'push':
                 data = JSON.parse(payload.toString());
-                this.onLocalPush(uid, data.frame, data.options);
+                this.localPush(uid, data.frame, data.options);
                 break;
             case 'pull':
                 data = JSON.parse(payload.toString());
-                this.onLocalPull(uid, data.options);
+                this.localPull(uid, data.options);
                 break;
             case 'events':
                 data = JSON.parse(payload.toString());
-                this.onLocalEvent(uid, topicParts[2], data);
+                this.localEvent(uid, topicParts[2], data);
                 break;
         }
     }
@@ -119,17 +119,12 @@ export class MQTTClient extends RemoteNodeService {
      * @param {Node<any, any>} node Node to register
      * @returns {boolean} Registration success
      */
-    public registerNode(node: Node<any, any>): boolean {
-        super.registerNode(node);
+    public registerNode(node: Node<any, any>): this {
         // Subscribe to all enpoints for the node
         this.client.subscribe(`${node.uid}/push`);
         this.client.subscribe(`${node.uid}/pull`);
         this.client.subscribe(`${node.uid}/events/completed`);
         this.client.subscribe(`${node.uid}/events/error`);
-        this.client.on('message', this._onMessage.bind(this));
-        this.logger('debug', {
-            message: `Registered remote client node ${node.uid}`,
-        });
-        return true;
+        return super.registerNode(node);
     }
 }
