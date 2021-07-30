@@ -24,7 +24,7 @@ describe('node client', () => {
                     serverModel = model;
                     ModelBuilder.create()
                         .addService(new MQTTClient({
-                            url: "localhost:1443",
+                            url: "mqtt://localhost:1443",
                         }))
                         .from()
                         .to(new MQTTSinkNode({
@@ -58,6 +58,7 @@ describe('node client', () => {
                     uid: "source"
                 }))
                 .to(new CallbackSinkNode((frame: DataFrame) => {
+                    console.log(frame);
                     expect(frame.getObjects()[0].uid).to.equal("abc");
                     serverModel.emit('destroy');
                     clientModel.emit('destroy');
