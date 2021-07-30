@@ -38,6 +38,7 @@ export class MQTTClient extends RemoteNodeService {
      */
     public remotePush<T extends DataFrame | DataFrame[]>(uid: string, frame: T, options?: PushOptions): Promise<void> {
         return new Promise((resolve) => {
+            console.log('pushing');
             this.client.publish(
                 `${uid}/push`,
                 JSON.stringify({
