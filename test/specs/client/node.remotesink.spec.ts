@@ -54,11 +54,11 @@ describe('node client', () => {
                 .addService(new MQTTServer({
                     port: 1443
                 }))
+                .withLogger(console.log)
                 .from(new MQTTSourceNode({
                     uid: "source"
                 }))
                 .to(new CallbackSinkNode((frame: DataFrame) => {
-                    console.log(frame);
                     expect(frame.getObjects()[0].uid).to.equal("abc");
                     serverModel.emit('destroy');
                     clientModel.emit('destroy');
