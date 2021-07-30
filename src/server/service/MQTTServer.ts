@@ -77,6 +77,7 @@ export class MQTTServer extends MQTTClient {
                 );
             }
             this.server.listen(this.options.port, () => {
+                this.model.logger('info', 'Server listenering: ' + brokerId);
                 this.connect()
                     .then(() => {
                         resolve();

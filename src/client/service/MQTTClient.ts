@@ -38,7 +38,6 @@ export class MQTTClient extends RemoteNodeService {
      */
     public remotePush<T extends DataFrame | DataFrame[]>(uid: string, frame: T, options?: PushOptions): Promise<void> {
         return new Promise((resolve) => {
-            console.log('pushing');
             this.client.publish(
                 `${uid}/push`,
                 JSON.stringify({
@@ -98,6 +97,7 @@ export class MQTTClient extends RemoteNodeService {
         const uid = topicParts[0];
         const action = topicParts[1];
         let data: any = {};
+        console.log(payload.toString());
         switch (action) {
             case 'push':
                 data = JSON.parse(payload.toString());
