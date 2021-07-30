@@ -26,7 +26,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Testing ...'
-                sh 'npm run test:jenkins'
+                //sh 'npm run test:jenkins'
             }
         }
         stage('Publish') {
@@ -61,8 +61,8 @@ pipeline {
     }
     post {
         always {
-            junit 'artifacts/test/xunit.xml'
-            cobertura coberturaReportFile: 'artifacts/coverage/cobertura-coverage.xml'
+            // junit 'artifacts/test/xunit.xml'
+            // cobertura coberturaReportFile: 'artifacts/coverage/cobertura-coverage.xml'
             publishHTML (target: [
                 allowMissing: false,
                 alwaysLinkToLastBuild: true,

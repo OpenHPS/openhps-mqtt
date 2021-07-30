@@ -1,4 +1,13 @@
-import { DataFrame, DataSerializer, Node, PullOptions, PushOptions, RemoteNodeService } from '@openhps/core';
+import {
+    DataFrame,
+    DataSerializer,
+    Node,
+    PullOptions,
+    PushOptions,
+    RemoteNodeService,
+    SinkNode,
+    SourceNode,
+} from '@openhps/core';
 import { Client, connect } from 'mqtt';
 import { MQTTClientOptions } from './MQTTClientOptions';
 
@@ -97,7 +106,6 @@ export class MQTTClient extends RemoteNodeService {
         const uid = topicParts[0];
         const action = topicParts[1];
         let data: any = {};
-        console.log(payload.toString());
         switch (action) {
             case 'push':
                 data = JSON.parse(payload.toString());
@@ -122,8 +130,14 @@ export class MQTTClient extends RemoteNodeService {
      */
     public registerNode(node: Node<any, any>): this {
         // Subscribe to all enpoints for the node
-        this.client.subscribe(`${node.uid}/push`);
-        this.client.subscribe(`${node.uid}/pull`);
+        if (node instanceof SourceNode) {
+            this.client.subscribe(`${node.uid}/push`);
+        } else if (node instanceof SinkNode) {
+            this.client.subscribe(`${node.uid}/pull`);
+        } else {
+            this.client.subscribe(`${node.uid}/push`);
+            this.client.subscribe(`${node.uid}/pull`);
+        }
         this.client.subscribe(`${node.uid}/events/completed`);
         this.client.subscribe(`${node.uid}/events/error`);
         return super.registerNode(node);
