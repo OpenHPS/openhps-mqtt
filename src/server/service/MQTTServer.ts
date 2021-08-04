@@ -1,4 +1,3 @@
-import { DataFrame, DataSerializer, PullOptions, PushOptions } from '@openhps/core';
 import { Aedes } from 'aedes';
 import * as aedes from 'aedes';
 import { createServer, Server } from 'net';
@@ -96,94 +95,6 @@ export class MQTTServer extends MQTTClient {
                     resolve();
                 });
             });
-        });
-    }
-
-    /**
-     * Send a push to a specific remote node
-     *
-     * @param {string} uid Remote Node UID
-     * @param {DataFrame} frame Data frame to push
-     * @param {PushOptions} [options] Push options
-     */
-    public remotePush<T extends DataFrame | DataFrame[]>(uid: string, frame: T, options?: PushOptions): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.aedes.publish(
-                {
-                    topic: `${uid}/push`,
-                    payload: JSON.stringify({
-                        frame: DataSerializer.serialize(frame),
-                        options,
-                    }),
-                    qos: this.options.qos,
-                    cmd: 'publish',
-                    dup: false,
-                    retain: true,
-                },
-                (error?: Error) => {
-                    if (error) {
-                        return reject(error);
-                    }
-                    resolve();
-                },
-            );
-        });
-    }
-
-    /**
-     * Send a pull request to a specific remote node
-     *
-     * @param {string} uid Remote Node UID
-     * @param {PullOptions} [options] Pull options
-     */
-    public remotePull(uid: string, options?: PullOptions): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.aedes.publish(
-                {
-                    topic: `${uid}/pull`,
-                    payload: JSON.stringify({
-                        options,
-                    }),
-                    qos: this.options.qos,
-                    cmd: 'publish',
-                    dup: false,
-                    retain: true,
-                },
-                (error?: Error) => {
-                    if (error) {
-                        return reject(error);
-                    }
-                    resolve();
-                },
-            );
-        });
-    }
-
-    /**
-     * Send an error to a remote node
-     *
-     * @param {string} uid Remote Node UID
-     * @param {string} event Event name
-     * @param {any} arg Args
-     */
-    public remoteEvent(uid: string, event: string, arg: any): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.aedes.publish(
-                {
-                    topic: `${uid}/events/${event}`,
-                    payload: JSON.stringify(arg),
-                    qos: this.options.qos,
-                    cmd: 'publish',
-                    dup: false,
-                    retain: true,
-                },
-                (error?: Error) => {
-                    if (error) {
-                        return reject(error);
-                    }
-                    resolve();
-                },
-            );
         });
     }
 }

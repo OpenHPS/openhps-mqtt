@@ -13,6 +13,7 @@ describe('node client', () => {
             ModelBuilder.create()
                 .addService(new MQTTServer({
                     port: 1443,
+                    websocket: true
                 }))
                 .from(new MQTTSourceNode({
                     uid: "source"

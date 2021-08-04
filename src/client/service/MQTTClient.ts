@@ -1,8 +1,8 @@
-import { DataFrame, DataSerializer, Node, PullOptions, PushOptions, RemoteNodeService } from '@openhps/core';
+import { DataFrame, DataSerializer, Node, PullOptions, PushOptions, RemoteService, Service } from '@openhps/core';
 import { Client, connect } from 'mqtt';
 import { MQTTClientOptions } from './MQTTClientOptions';
 
-export class MQTTClient extends RemoteNodeService {
+export class MQTTClient extends RemoteService {
     protected client: Client;
     protected options: MQTTClientOptions;
 
@@ -37,10 +37,12 @@ export class MQTTClient extends RemoteNodeService {
      * @param {PushOptions} [options] Push options
      */
     public remotePush<T extends DataFrame | DataFrame[]>(uid: string, frame: T, options?: PushOptions): Promise<void> {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
+            const messageId = this.registerPromise(resolve, reject);
             this.client.publish(
-                `${uid}/push`,
+                `node/${uid}/push`,
                 JSON.stringify({
+                    messageId,
                     frame: DataSerializer.serialize(frame),
                     options,
                 }),
@@ -49,7 +51,6 @@ export class MQTTClient extends RemoteNodeService {
                     retain: true,
                 },
             );
-            resolve();
         });
     }
 
@@ -60,10 +61,12 @@ export class MQTTClient extends RemoteNodeService {
      * @param {PullOptions} [options] Pull options
      */
     public remotePull(uid: string, options?: PullOptions): Promise<void> {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
+            const messageId = this.registerPromise(resolve, reject);
             this.client.publish(
-                `${uid}/pull`,
+                `node/${uid}/pull`,
                 JSON.stringify({
+                    messageId,
                     options,
                 }),
                 {
@@ -71,7 +74,6 @@ export class MQTTClient extends RemoteNodeService {
                     retain: true,
                 },
             );
-            resolve();
         });
     }
 
@@ -80,35 +82,143 @@ export class MQTTClient extends RemoteNodeService {
      *
      * @param {string} uid Remote Node UID
      * @param {string} event Event name
-     * @param {any} arg Args
+     * @param {any[]} [args] Args
      */
-    public remoteEvent(uid: string, event: string, arg: any): Promise<void> {
-        return new Promise((resolve) => {
-            this.client.publish(`${uid}/events/${event}`, JSON.stringify(arg), {
-                qos: this.options.qos,
-                retain: true,
-            });
-            resolve();
+    public remoteEvent(uid: string, event: string, ...args: any[]): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const messageId = this.registerPromise(resolve, reject);
+            this.client.publish(
+                `node/${uid}/events/${event}`,
+                JSON.stringify({
+                    messageId,
+                    args,
+                }),
+                {
+                    qos: this.options.qos,
+                    retain: true,
+                },
+            );
+        });
+    }
+
+    /**
+     * Send a remote service call
+     *
+     * @param {string} uid Service uid
+     * @param {string} method Method to call
+     * @param {any[]} [args] Optional set of arguments
+     */
+    public remoteServiceCall(uid: string, method: string, ...args: any[]): Promise<any> {
+        return new Promise((resolve, reject) => {
+            const messageId = this.registerPromise(resolve, reject);
+            this.client.publish(
+                `service/${uid}/${method}`,
+                JSON.stringify({
+                    messageId,
+                    args,
+                }),
+                {
+                    qos: this.options.qos,
+                    retain: true,
+                },
+            );
         });
     }
 
     private _onMessage(topic: string, payload: Buffer): void {
         const topicParts = topic.split('/');
-        const uid = topicParts[0];
-        const action = topicParts[1];
-        let data: any = {};
-        switch (action) {
-            case 'push':
-                data = JSON.parse(payload.toString());
-                this.localPush(uid, data.frame, data.options);
+        const type = topicParts[0];
+        const uid = topicParts[1];
+        const action = topicParts[2];
+        const response = topicParts[topicParts.length - 1] === 'response';
+
+        const data: any = JSON.parse(payload.toString());
+
+        if (response) {
+            const promise = this.getPromise(data.messageId);
+            if (!promise) {
+                return;
+            } else if (data.status === 'ok') {
+                promise.resolve(data.result);
+            } else if (data.status === 'error') {
+                promise.reject(data.error);
+            }
+            return;
+        }
+
+        switch (type) {
+            case 'node':
+                switch (action) {
+                    case 'push':
+                        Promise.resolve(this.localPush(uid, data.frame, data.options))
+                            .then(() => {
+                                this.client.publish(
+                                    topic + '/response',
+                                    JSON.stringify({
+                                        messageId: data.messageId,
+                                        status: 'ok',
+                                    }),
+                                );
+                            })
+                            .catch((ex) => {
+                                this.client.publish(
+                                    topic + '/response',
+                                    JSON.stringify({
+                                        messageId: data.messageId,
+                                        status: 'error',
+                                        error: ex,
+                                    }),
+                                );
+                            });
+                        break;
+                    case 'pull':
+                        Promise.resolve(this.localPull(uid, data.options))
+                            .then(() => {
+                                this.client.publish(
+                                    topic + '/response',
+                                    JSON.stringify({
+                                        messageId: data.messageId,
+                                        status: 'ok',
+                                    }),
+                                );
+                            })
+                            .catch((ex) => {
+                                this.client.publish(
+                                    topic + '/response',
+                                    JSON.stringify({
+                                        messageId: data.messageId,
+                                        status: 'error',
+                                        error: ex,
+                                    }),
+                                );
+                            });
+                        break;
+                    case 'events':
+                        Promise.resolve(this.localEvent(uid, topicParts[3], data))
+                            .then((result: any) => {
+                                this.client.publish(
+                                    topic + '/response',
+                                    JSON.stringify({
+                                        messageId: data.messageId,
+                                        status: 'ok',
+                                        result,
+                                    }),
+                                );
+                            })
+                            .catch((ex) => {
+                                this.client.publish(
+                                    topic + '/response',
+                                    JSON.stringify({
+                                        messageId: data.messageId,
+                                        status: 'error',
+                                        error: ex,
+                                    }),
+                                );
+                            });
+                        break;
+                }
                 break;
-            case 'pull':
-                data = JSON.parse(payload.toString());
-                this.localPull(uid, data.options);
-                break;
-            case 'events':
-                data = JSON.parse(payload.toString());
-                this.localEvent(uid, topicParts[2], data);
+            case 'service':
                 break;
         }
     }
@@ -120,11 +230,21 @@ export class MQTTClient extends RemoteNodeService {
      * @returns {boolean} Registration success
      */
     public registerNode(node: Node<any, any>): this {
-        // Subscribe to all enpoints for the node
-        this.client.subscribe(`${node.uid}/push`);
-        this.client.subscribe(`${node.uid}/pull`);
-        this.client.subscribe(`${node.uid}/events/completed`);
-        this.client.subscribe(`${node.uid}/events/error`);
+        // Subscribe to all endpoints for the node
+        this.client.subscribe(`node/${node.uid}/push`);
+        this.client.subscribe(`node/${node.uid}/pull`);
+        this.client.subscribe(`node/${node.uid}/events/completed`);
+        this.client.subscribe(`node/${node.uid}/events/error`);
+        this.client.subscribe(`node/${node.uid}/push/response`);
+        this.client.subscribe(`node/${node.uid}/pull/response`);
+        this.client.subscribe(`node/${node.uid}/events/completed/response`);
+        this.client.subscribe(`node/${node.uid}/events/error/response`);
         return super.registerNode(node);
+    }
+
+    public registerService(service: Service): this {
+        this.client.subscribe(`service/${service.uid}/*`);
+        this.client.subscribe(`service/${service.uid}/*/response`);
+        return super.registerService(service);
     }
 }
