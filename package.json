@@ -50,7 +50,7 @@
     "aedes": "^0.46.1",
     "mqtt": "^4.2.8",
     "websocket-stream": "^5.5.2",
-    "ws": "^8.0.0"
+    "ws": "^5.2.3"
   },
   "peerDependencies": {
     "@openhps/core": ">=0.3.0-alpha.71",
@@ -63,7 +63,7 @@
     "@types/chai": "^4.2.21",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.4.10",
-    "@types/ws": "^7.4.7",
+    "@types/ws": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^4.29.0",
     "@typescript-eslint/parser": "^4.29.0",
     "chai": "^4.3.4",
