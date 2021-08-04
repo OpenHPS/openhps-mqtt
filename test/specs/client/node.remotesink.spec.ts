@@ -25,7 +25,7 @@ describe('node client', () => {
                     serverModel = model;
                     ModelBuilder.create()
                         .addService(new MQTTClient({
-                            url: "localhost:1443",
+                            url: "mqtt://localhost:1443",
                         }))
                         .from()
                         .to(new MQTTSinkNode({
@@ -55,6 +55,7 @@ describe('node client', () => {
                 .addService(new MQTTServer({
                     port: 1443
                 }))
+                .withLogger(console.log)
                 .from(new MQTTSourceNode({
                     uid: "source"
                 }))
