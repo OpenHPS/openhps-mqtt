@@ -56,11 +56,15 @@ const bundle = (env, module) => ({
     libraryTarget: module ? "module" : "umd",
     umdNamedDefine: !module,
     globalObject: module ? undefined : `(typeof self !== 'undefined' ? self : this)`,
+    environment: { module },
   },
   experiments: {
     outputModule: module,
   },
-  externals: ['@openhps/core'],
+  externalsType: module ? "module" : undefined,
+  externals: {
+    '@openhps/core': "node_modules/@openhps/core/esm/index.js"
+  },
   devtool: 'source-map',
   plugins: [],
   ...defaultConfig(env)

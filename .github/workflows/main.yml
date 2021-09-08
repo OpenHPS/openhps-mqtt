@@ -8,25 +8,31 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build_and_test:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Build
         run: |
           npm install
           npm run build:cjs
           npm run build:esm
+          npm run build:webpack
       - name: Quality
         run: |
           npm run lint
       - name: Documentation
         run: |
           npm run build:typedoc
-  test:
-    runs-on: ubuntu-latest
-    steps:
       - name: Test
         run: |
           npm run test
           npm run cover
+      - name: Publish
+        uses: actions/upload-artifact@v2
+        with:
+          name: web
+          path: |
+            dist/web/*
+            !dist/web/*.txt
       
