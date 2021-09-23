@@ -63,7 +63,7 @@ const bundle = (env, module) => ({
   },
   externalsType: module ? "module" : undefined,
   externals: {
-    '@openhps/core': "node_modules/@openhps/core/esm/index.js"
+    '@openhps/core': "./" + (module ? "openhps-core.es" : "openhps-core") + (env.prod ? ".min" : "") + ".js"
   },
   devtool: 'source-map',
   plugins: [],

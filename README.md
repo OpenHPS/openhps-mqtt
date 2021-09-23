@@ -99,6 +99,13 @@ The API is exactly the same as the client example.
 }
 ```
 
+### Browser Usage
+The following compiled files are provided for browser usage:
+- openhps-mqtt.js: CJS version. Requires (openhps-core.js in same directory)
+- openhps-mqtt.min.js: Minified CJS version. Requires (openhps-core.min.js in same directory)
+- openhps-mqtt.es.js: ESM version. Requires (openhps-core.es.js in same directory)
+- openhps-mqtt.es.min.js: Minified ESM version. Requires (openhps-core.es.min.js in same directory)
+
 ## Contributors
 The framework is open source and is mainly developed by PhD Student Maxim Van de Wynckel as part of his research towards *Hybrid Positioning and Implicit Human-Computer Interaction* under the supervision of Prof. Dr. Beat Signer.
 
