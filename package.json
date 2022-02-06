@@ -54,13 +54,13 @@
     "ws": "^5.2.3"
   },
   "peerDependencies": {
-    "@openhps/core": ">=0.3.2-alpha.1",
+    "@openhps/core": ">=0.3.13",
     "reflect-metadata": ">=0.1.13"
   },
   "devDependencies": {
     "@commitlint/cli": "^13.2.1",
     "@commitlint/config-conventional": "^13.2.0",
-    "@openhps/core": "^0.3.0-alpha.75",
+    "@openhps/core": ">=0.3.13",
     "@types/chai": "^4.2.22",
     "@types/mocha": "^9.0.0",
     "@types/node": "^16.11.1",
