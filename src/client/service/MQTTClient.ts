@@ -35,6 +35,7 @@ export class MQTTClient extends RemoteService {
      * @param {string} uid Remote Node UID
      * @param {DataFrame} frame Data frame to push
      * @param {PushOptions} [options] Push options
+     * @returns {Promise<void>} Promise of completed push
      */
     public remotePush<T extends DataFrame | DataFrame[]>(uid: string, frame: T, options?: PushOptions): Promise<void> {
         return new Promise((resolve, reject) => {
@@ -59,6 +60,7 @@ export class MQTTClient extends RemoteService {
      *
      * @param {string} uid Remote Node UID
      * @param {PullOptions} [options] Pull options
+     * @returns {Promise<void>} Promise of completed pull
      */
     public remotePull(uid: string, options?: PullOptions): Promise<void> {
         return new Promise((resolve, reject) => {
@@ -83,6 +85,7 @@ export class MQTTClient extends RemoteService {
      * @param {string} uid Remote Node UID
      * @param {string} event Event name
      * @param {any[]} [args] Args
+     * @returns {Promise<void>} Promise of emitted event
      */
     public remoteEvent(uid: string, event: string, ...args: any[]): Promise<void> {
         return new Promise((resolve, reject) => {
@@ -107,6 +110,7 @@ export class MQTTClient extends RemoteService {
      * @param {string} uid Service uid
      * @param {string} method Method to call
      * @param {any[]} [args] Optional set of arguments
+     * @returns {Promise<any>} Service call output promise
      */
     public remoteServiceCall(uid: string, method: string, ...args: any[]): Promise<any> {
         return new Promise((resolve, reject) => {
