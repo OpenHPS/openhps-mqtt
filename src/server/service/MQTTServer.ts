@@ -19,6 +19,7 @@ export class MQTTServer extends MQTTClient {
         super();
         this.options = {
             url: '',
+            qos: 0,
             ...(options || {
                 port: 1883,
             }),

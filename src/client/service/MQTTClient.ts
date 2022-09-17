@@ -8,7 +8,10 @@ export class MQTTClient extends RemoteService {
 
     constructor(options?: MQTTClientOptions) {
         super();
-        this.options = options;
+        this.options = {
+            qos: 0,
+            ...options,
+        };
 
         this.once('build', this.connect.bind(this));
         this.once('destroy', this.disconnect.bind(this));
@@ -37,12 +40,13 @@ export class MQTTClient extends RemoteService {
      * @param {PushOptions} [options] Push options
      * @returns {Promise<void>} Promise of completed push
      */
-    public remotePush<T extends DataFrame | DataFrame[]>(uid: string, frame: T, options?: PushOptions): Promise<void> {
+    remotePush<T extends DataFrame | DataFrame[]>(uid: string, frame: T, options?: PushOptions): Promise<void> {
         return new Promise((resolve, reject) => {
             const messageId = this.registerPromise(resolve, reject);
             this.client.publish(
                 `node/${uid}/push`,
                 JSON.stringify({
+                    clientId: this.client.options.clientId,
                     messageId,
                     frame: DataSerializer.serialize(frame),
                     options,
@@ -62,12 +66,13 @@ export class MQTTClient extends RemoteService {
      * @param {PullOptions} [options] Pull options
      * @returns {Promise<void>} Promise of completed pull
      */
-    public remotePull(uid: string, options?: PullOptions): Promise<void> {
+    remotePull(uid: string, options?: PullOptions): Promise<void> {
         return new Promise((resolve, reject) => {
             const messageId = this.registerPromise(resolve, reject);
             this.client.publish(
                 `node/${uid}/pull`,
                 JSON.stringify({
+                    clientId: this.client.options.clientId,
                     messageId,
                     options,
                 }),
@@ -87,12 +92,13 @@ export class MQTTClient extends RemoteService {
      * @param {any[]} [args] Args
      * @returns {Promise<void>} Promise of emitted event
      */
-    public remoteEvent(uid: string, event: string, ...args: any[]): Promise<void> {
+    remoteEvent(uid: string, event: string, ...args: any[]): Promise<void> {
         return new Promise((resolve, reject) => {
             const messageId = this.registerPromise(resolve, reject);
             this.client.publish(
                 `node/${uid}/events/${event}`,
                 JSON.stringify({
+                    clientId: this.client.options.clientId,
                     messageId,
                     args,
                 }),
@@ -112,12 +118,13 @@ export class MQTTClient extends RemoteService {
      * @param {any[]} [args] Optional set of arguments
      * @returns {Promise<any>} Service call output promise
      */
-    public remoteServiceCall(uid: string, method: string, ...args: any[]): Promise<any> {
+    remoteServiceCall(uid: string, method: string, ...args: any[]): Promise<any> {
         return new Promise((resolve, reject) => {
             const messageId = this.registerPromise(resolve, reject);
             this.client.publish(
                 `service/${uid}/${method}`,
                 JSON.stringify({
+                    clientId: this.client.options.clientId,
                     messageId,
                     args,
                 }),
@@ -137,6 +144,11 @@ export class MQTTClient extends RemoteService {
         const response = topicParts[topicParts.length - 1] === 'response';
 
         const data: any = JSON.parse(payload.toString());
+
+        // Check if message send by self
+        if (data.clientId === this.client.options.clientId) {
+            return;
+        }
 
         if (response) {
             const promise = this.getPromise(data.messageId);
@@ -159,6 +171,7 @@ export class MQTTClient extends RemoteService {
                                 this.client.publish(
                                     topic + '/response',
                                     JSON.stringify({
+                                        clientId: this.client.options.clientId,
                                         messageId: data.messageId,
                                         status: 'ok',
                                     }),
@@ -168,6 +181,7 @@ export class MQTTClient extends RemoteService {
                                 this.client.publish(
                                     topic + '/response',
                                     JSON.stringify({
+                                        clientId: this.client.options.clientId,
                                         messageId: data.messageId,
                                         status: 'error',
                                         error: ex,
@@ -181,6 +195,7 @@ export class MQTTClient extends RemoteService {
                                 this.client.publish(
                                     topic + '/response',
                                     JSON.stringify({
+                                        clientId: this.client.options.clientId,
                                         messageId: data.messageId,
                                         status: 'ok',
                                     }),
@@ -190,6 +205,7 @@ export class MQTTClient extends RemoteService {
                                 this.client.publish(
                                     topic + '/response',
                                     JSON.stringify({
+                                        clientId: this.client.options.clientId,
                                         messageId: data.messageId,
                                         status: 'error',
                                         error: ex,
@@ -203,6 +219,7 @@ export class MQTTClient extends RemoteService {
                                 this.client.publish(
                                     topic + '/response',
                                     JSON.stringify({
+                                        clientId: this.client.options.clientId,
                                         messageId: data.messageId,
                                         status: 'ok',
                                         result,
@@ -213,6 +230,7 @@ export class MQTTClient extends RemoteService {
                                 this.client.publish(
                                     topic + '/response',
                                     JSON.stringify({
+                                        clientId: this.client.options.clientId,
                                         messageId: data.messageId,
                                         status: 'error',
                                         error: ex,
@@ -223,6 +241,29 @@ export class MQTTClient extends RemoteService {
                 }
                 break;
             case 'service':
+                Promise.resolve(this.localServiceCall(uid, action, ...data))
+                    .then((result: any) => {
+                        this.client.publish(
+                            topic + '/response',
+                            JSON.stringify({
+                                clientId: this.client.options.clientId,
+                                messageId: data.messageId,
+                                status: 'ok',
+                                result,
+                            }),
+                        );
+                    })
+                    .catch((ex) => {
+                        this.client.publish(
+                            topic + '/response',
+                            JSON.stringify({
+                                clientId: this.client.options.clientId,
+                                messageId: data.messageId,
+                                status: 'error',
+                                error: ex,
+                            }),
+                        );
+                    });
                 break;
         }
     }
@@ -246,7 +287,14 @@ export class MQTTClient extends RemoteService {
         return super.registerNode(node);
     }
 
+    /**
+     * Register a remote client service
+     *
+     * @param {Service} service Service to register
+     * @returns {boolean} Registration success
+     */
     public registerService(service: Service): this {
+        // Subscribe to all actions for the service
         this.client.subscribe(`service/${service.uid}/*`);
         this.client.subscribe(`service/${service.uid}/*/response`);
         return super.registerService(service);

@@ -34,10 +34,10 @@ describe('node client', () => {
                         }))
                         .to()
                         .build().then(model => {
-                            clientModel = model;
-                            return clientModel.pull();
-                        }).then(() => {
-                            
+                            setTimeout(() => {
+                                clientModel = model;
+                                clientModel.pull();
+                            }, 1000);
                         }).catch(ex => {
                             done(ex);
                         });

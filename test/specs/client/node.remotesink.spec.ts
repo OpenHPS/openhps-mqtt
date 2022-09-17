@@ -53,7 +53,7 @@ describe('node client', () => {
             
             ModelBuilder.create()
                 .addService(new MQTTServer({
-                    port: 1443
+                    port: 1443,
                 }))
                 .withLogger(console.log)
                 .from(new MQTTSourceNode({
@@ -76,10 +76,12 @@ describe('node client', () => {
                             uid: "source"
                         }))
                         .build().then(model => {
-                            clientModel = model;
-                            const frame = new DataFrame();
-                            frame.addObject(new DataObject("abc"));
-                            model.push(frame);
+                            setTimeout(() => {
+                                clientModel = model;
+                                const frame = new DataFrame();
+                                frame.addObject(new DataObject("abc"));
+                                clientModel.push(frame);
+                            }, 1000);
                         }).catch(ex => {
                             done(ex);
                         });
