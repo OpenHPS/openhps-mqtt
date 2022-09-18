@@ -5,26 +5,41 @@ import { createServer as createSecureServer } from 'tls';
 import { MQTTServerOptions } from './MQTTServerOptions';
 import { MQTTClient } from '../../client/service/MQTTClient';
 import { MQTTClientOptions } from '../../client/service/MQTTClientOptions';
-import { createServer as createWebsocketServer } from 'websocket-stream';
+import { WebSocket } from 'ws';
+import { Server as HTTPSServer, createServer as createServerHTTPS } from "https";
+import { Server as HTTPServer, createServer as createServerHTTP } from "http";
 
 /**
  * MQTT Server
  */
 export class MQTTServer extends MQTTClient {
     protected options: MQTTServerOptions & MQTTClientOptions;
-    protected server: Server;
+    protected server: Server | HTTPServer | HTTPServer;
     protected aedes: Aedes;
 
     constructor(options?: MQTTServerOptions) {
         super();
         this.options = {
             url: '',
-            qos: 0,
             ...(options || {
                 port: 1883,
             }),
         };
-        this.options.url = `mqtt://localhost:${options.port}`;
+
+        if (this.options.websocket) {
+            this.options = {
+                keepalive: 30,
+                protocolId: 'MQTT',
+                protocolVersion: 4,
+                clean: true,
+                reconnectPeriod: 1000,
+                connectTimeout: 30 * 1000,
+                ...this.options
+            }
+        }
+        
+        this.options.url =
+            (this.options.websocket ? `ws${this.options.tls ? 's' : ''}://` : `mqtt://`) + `localhost:${options.port}`;
 
         this.removeAllListeners('build');
         this.once('build', this._onInitServer.bind(this));
@@ -56,28 +71,39 @@ export class MQTTServer extends MQTTClient {
                 );
             });
 
-            if (this.options.tls) {
-                this.server = createSecureServer(
-                    {
-                        key: this.options.key,
-                        cert: this.options.cert,
-                    },
-                    this.options.websocket ? undefined : this.aedes.handle,
-                );
-            } else {
-                this.server = createServer(this.options.websocket ? undefined : this.aedes.handle);
-            }
             // Create websocket server
             if (this.options.websocket) {
-                (createWebsocketServer as any)(
-                    {
-                        server: this.server,
-                    },
-                    this.aedes.handle,
-                );
+                if (this.options.tls) {
+                    this.server = createServerHTTPS(
+                        {
+                            key: this.options.key,
+                            cert: this.options.cert,
+                        }
+                    );
+                } else {
+                    this.server = createServerHTTP();
+                }
+                const wss = new WebSocket.Server({ server: this.server as HTTPServer | HTTPServer })
+                wss.on('connection', (ws) => {
+                    const duplex = WebSocket.createWebSocketStream(ws);
+                    this.aedes.handle(duplex);
+                });
+            } else {
+                if (this.options.tls) {
+                    this.server = createSecureServer(
+                        {
+                            key: this.options.key,
+                            cert: this.options.cert,
+                        },
+                        this.options.websocket ? undefined : this.aedes.handle,
+                    );
+                } else {
+                    this.server = createServer(this.options.websocket ? undefined : this.aedes.handle);
+                }
             }
+            
             this.server.listen(this.options.port, () => {
-                this.model.logger('info', 'Server listening: ' + brokerId);
+                this.model.logger('info', `Server listening on port ${this.options.port}: ${brokerId}`);
                 this.connect()
                     .then(() => {
                         resolve();

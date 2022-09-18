@@ -54,6 +54,7 @@ describe('node client', () => {
             ModelBuilder.create()
                 .addService(new MQTTServer({
                     port: 1443,
+                    websocket: true,
                 }))
                 .withLogger(console.log)
                 .from(new MQTTSourceNode({
@@ -61,15 +62,15 @@ describe('node client', () => {
                 }))
                 .to(new CallbackSinkNode((frame: DataFrame) => {
                     expect(frame.getObjects()[0].uid).to.equal("abc");
-                    serverModel.emit('destroy');
                     clientModel.emit('destroy');
+                    serverModel.emit('destroy');
                     done();
                 }))
                 .build().then(model => {
                     serverModel = model;
                     ModelBuilder.create()
                         .addService(new MQTTClient({
-                            url: "mqtt://localhost:1443",
+                            url: "ws://localhost:1443",
                         }))
                         .from()
                         .to(new MQTTSinkNode({

@@ -10,6 +10,7 @@ export class MQTTClient extends RemoteService {
         super();
         this.options = {
             qos: 0,
+            clientId: 'CLIENT_' + process.pid,
             ...options,
         };
 
@@ -19,7 +20,14 @@ export class MQTTClient extends RemoteService {
 
     protected connect(): Promise<void> {
         return new Promise((resolve) => {
-            this.client = connect(this.options.url, {});
+            this.client = connect(this.options.url, this.options);
+            this.client.on("error", (error) => {
+                this.model.logger('error', { message: `Connection error: ${error.message}`, error });
+                this.client?.end();
+            });
+            this.client.on("reconnect", () => {
+                this.model.logger('warn', { message: `Reconnecting to MQTT server ...` });
+            });
             this.client.on('message', this._onMessage.bind(this));
             resolve();
         });
@@ -42,6 +50,10 @@ export class MQTTClient extends RemoteService {
      */
     remotePush<T extends DataFrame | DataFrame[]>(uid: string, frame: T, options?: PushOptions): Promise<void> {
         return new Promise((resolve, reject) => {
+            if (!this.client.connected || this.client.disconnecting) {
+                return resolve(undefined);
+            }
+
             const messageId = this.registerPromise(resolve, reject);
             this.client.publish(
                 `node/${uid}/push`,
@@ -68,6 +80,10 @@ export class MQTTClient extends RemoteService {
      */
     remotePull(uid: string, options?: PullOptions): Promise<void> {
         return new Promise((resolve, reject) => {
+            if (!this.client.connected || this.client.disconnecting) {
+                return resolve(undefined);
+            }
+
             const messageId = this.registerPromise(resolve, reject);
             this.client.publish(
                 `node/${uid}/pull`,
@@ -94,6 +110,10 @@ export class MQTTClient extends RemoteService {
      */
     remoteEvent(uid: string, event: string, ...args: any[]): Promise<void> {
         return new Promise((resolve, reject) => {
+            if (!this.client.connected || this.client.disconnecting) {
+                return resolve(undefined);
+            }
+
             const messageId = this.registerPromise(resolve, reject);
             this.client.publish(
                 `node/${uid}/events/${event}`,
@@ -120,6 +140,10 @@ export class MQTTClient extends RemoteService {
      */
     remoteServiceCall(uid: string, method: string, ...args: any[]): Promise<any> {
         return new Promise((resolve, reject) => {
+            if (!this.client.connected || this.client.disconnecting) {
+                return resolve(undefined);
+            }
+            
             const messageId = this.registerPromise(resolve, reject);
             this.client.publish(
                 `service/${uid}/${method}`,

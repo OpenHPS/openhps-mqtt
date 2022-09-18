@@ -6,13 +6,13 @@ import { MQTTClient, MQTTServer, MQTTSinkNode, MQTTSourceNode } from '../../../s
 describe('node client', () => {
     describe('remote source', () => {
 
-        it('should connect to a websocket server', (done) => {
+        it('should connect to a socket server', (done) => {
             let clientModel: Model<any, any>;
             let serverModel: Model<any, any>;
 
             ModelBuilder.create()
                 .addService(new MQTTServer({
-                    port: 1443
+                    port: 1443,           
                 }))
                 .from(new CallbackSourceNode(() => {
                     serverModel.emit('destroy');
@@ -28,6 +28,47 @@ describe('node client', () => {
                     ModelBuilder.create()
                         .addService(new MQTTClient({
                             url: 'mqtt://localhost:1443',
+                        }))
+                        .from(new MQTTSourceNode({
+                            uid: "sink"
+                        }))
+                        .to()
+                        .build().then(model => {
+                            setTimeout(() => {
+                                clientModel = model;
+                                clientModel.pull();
+                            }, 1000);
+                        }).catch(ex => {
+                            done(ex);
+                        });
+                }).catch(ex => {
+                    done(ex);
+                });
+        }).timeout(50000);
+
+        it('should connect to a websocket server', (done) => {
+            let clientModel: Model<any, any>;
+            let serverModel: Model<any, any>;
+
+            ModelBuilder.create()
+                .addService(new MQTTServer({
+                    port: 1443,
+                    websocket: true
+                }))
+                .from(new CallbackSourceNode(() => {
+                    clientModel.emit('destroy');
+                    serverModel.emit('destroy');
+                    done();
+                    return undefined;
+                }))
+                .to(new MQTTSinkNode({
+                    uid: "sink"
+                }))
+                .build().then(model => {
+                    serverModel = model;
+                    ModelBuilder.create()
+                        .addService(new MQTTClient({
+                            url: 'ws://localhost:1443',
                         }))
                         .from(new MQTTSourceNode({
                             uid: "sink"

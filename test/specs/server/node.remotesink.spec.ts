@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import 'mocha';
-import { ModelBuilder, DataFrame, DataObject, DataSerializer } from '@openhps/core';
-import { MQTTServer, MQTTSourceNode } from '../../../src';
+import { ModelBuilder } from '@openhps/core';
+import { MQTTSourceNode } from '../../../src';
 
 describe('node server', () => {
     describe('remote sink', () => {
