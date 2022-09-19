@@ -2,6 +2,10 @@ import { AedesOptions } from 'aedes';
 
 export interface MQTTServerOptions extends AedesOptions {
     /**
+     * Topic prefix
+     */
+    prefix?: string;
+    /**
      * Server port
      */
     port: number;

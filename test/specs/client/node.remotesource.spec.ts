@@ -15,9 +15,11 @@ describe('node client', () => {
                     port: 1443,           
                 }))
                 .from(new CallbackSourceNode(() => {
-                    serverModel.emit('destroy');
-                    clientModel.emit('destroy');
-                    done();
+                    clientModel.emitAsync('destroy').then(() => {
+                        return serverModel.emitAsync('destroy');
+                    }).then(() => {
+                        done();
+                    });
                     return undefined;
                 }))
                 .to(new MQTTSinkNode({
@@ -87,6 +89,50 @@ describe('node client', () => {
                 });
         }).timeout(50000);
 
+        it('should support topic prefixes', (done) => {
+            let clientModel: Model<any, any>;
+            let serverModel: Model<any, any>;
+
+            ModelBuilder.create()
+                .addService(new MQTTServer({
+                    port: 1443,
+                    websocket: true,
+                    prefix: 'openhps/model/'
+                }))
+                .from(new CallbackSourceNode(() => {
+                    clientModel.emit('destroy');
+                    serverModel.emit('destroy');
+                    done();
+                    return undefined;
+                }))
+                .to(new MQTTSinkNode({
+                    uid: "sink"
+                }))
+                .build().then(model => {
+                    serverModel = model;
+                    ModelBuilder.create()
+                        .addService(new MQTTClient({
+                            url: 'ws://localhost:1443',
+                            prefix: 'openhps/model/'
+                        }))
+                        .withLogger(console.log)
+                        .from(new MQTTSourceNode({
+                            uid: "sink"
+                        }))
+                        .to()
+                        .build().then(model => {
+                            setTimeout(() => {
+                                clientModel = model;
+                                clientModel.pull();
+                            }, 1000);
+                        }).catch(ex => {
+                            done(ex);
+                        });
+                }).catch(ex => {
+                    done(ex);
+                });
+        }).timeout(50000);
+
         it('should forward server pushes to the client', (done) => {
             let clientModel: Model<any, any>;
             let serverModel: Model<any, any>;
@@ -109,9 +155,11 @@ describe('node client', () => {
                             uid: "sink"
                         }))
                         .to(new CallbackSinkNode(frame => {
-                            serverModel.emit('destroy');
-                            clientModel.emit('destroy');
-                            done();
+                            clientModel.emitAsync('destroy').then(() => {
+                                return serverModel.emitAsync('destroy');
+                            }).then(() => {
+                                done();
+                            });
                         }))
                         .build().then(model => {
                             clientModel = model;
@@ -155,9 +203,11 @@ describe('node client', () => {
                             const frame = new DataFrame();
                             frame.addObject(new DataObject("abc"));
                             serverModel.once('error', err => {
-                                serverModel.emit('destroy');
-                                clientModel.emit('destroy');
-                                done();
+                                clientModel.emitAsync('destroy').then(() => {
+                                    return serverModel.emitAsync('destroy');
+                                }).then(() => {
+                                    done();
+                                });
                             });
                             serverModel.push(frame);
                         }).catch(ex => {
@@ -199,9 +249,11 @@ describe('node client', () => {
                                 // Completed locally
                                 serverModel.once('completed', event => {
                                     // Completed on remote server
-                                    serverModel.emit('destroy');
-                                    clientModel.emit('destroy');
-                                    done();
+                                    clientModel.emitAsync('destroy').then(() => {
+                                        return serverModel.emitAsync('destroy');
+                                    }).then(() => {
+                                        done();
+                                    });
                                 });
                             });
                         }).catch(ex => {

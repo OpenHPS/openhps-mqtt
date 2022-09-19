@@ -25,7 +25,7 @@ describe('node client', () => {
                     serverModel = model;
                     ModelBuilder.create()
                         .addService(new MQTTClient({
-                            url: "mqtt://localhost:1443",
+                            url: "ws://localhost:1443",
                         }))
                         .from()
                         .to(new MQTTSinkNode({
@@ -36,9 +36,11 @@ describe('node client', () => {
                             const frame = new DataFrame();
                             frame.addObject(new DataObject("abc"));
                             model.push(frame);
-                            serverModel.emit('destroy');
-                            clientModel.emit('destroy');
-                            done();
+                            clientModel.emitAsync('destroy').then(() => {
+                                return serverModel.emitAsync('destroy');
+                            }).then(() => {
+                                done();
+                            });
                         }).catch(ex => {
                             done(ex);
                         });
@@ -56,15 +58,16 @@ describe('node client', () => {
                     port: 1443,
                     websocket: true,
                 }))
-                .withLogger(console.log)
                 .from(new MQTTSourceNode({
                     uid: "source"
                 }))
                 .to(new CallbackSinkNode((frame: DataFrame) => {
                     expect(frame.getObjects()[0].uid).to.equal("abc");
-                    clientModel.emit('destroy');
-                    serverModel.emit('destroy');
-                    done();
+                    clientModel.emitAsync('destroy').then(() => {
+                        return serverModel.emitAsync('destroy');
+                    }).then(() => {
+                        done();
+                    });
                 }))
                 .build().then(model => {
                     serverModel = model;
@@ -110,9 +113,11 @@ describe('node client', () => {
                             url: "mqtt://localhost:1443",
                         }))
                         .from(new CallbackSourceNode(() => {
-                            serverModel.emit('destroy');
-                            clientModel.emit('destroy');
-                            done();
+                            clientModel.emitAsync('destroy').then(() => {
+                                return serverModel.emitAsync('destroy');
+                            }).then(() => {
+                                done();
+                            });
                             return null;
                         }))
                         .to(new MQTTSinkNode({

@@ -1,5 +1,6 @@
 import { DataFrame, DataSerializer, Node, PullOptions, PushOptions, RemoteService, Service } from '@openhps/core';
 import { Client, connect } from 'mqtt';
+import { MQTTSinkNode, MQTTSourceNode } from '../nodes';
 import { MQTTClientOptions } from './MQTTClientOptions';
 
 export class MQTTClient extends RemoteService {
@@ -10,7 +11,7 @@ export class MQTTClient extends RemoteService {
         super();
         this.options = {
             qos: 0,
-            clientId: 'CLIENT_' + process.pid,
+            clientId: `CLIENT_${process.pid}_${Math.random().toString(16).substring(2, 8)}`,
             ...options,
         };
 
@@ -21,15 +22,17 @@ export class MQTTClient extends RemoteService {
     protected connect(): Promise<void> {
         return new Promise((resolve) => {
             this.client = connect(this.options.url, this.options);
-            this.client.on("error", (error) => {
+            this.client.on('error', (error) => {
                 this.model.logger('error', { message: `Connection error: ${error.message}`, error });
                 this.client?.end();
             });
-            this.client.on("reconnect", () => {
+            this.client.on('reconnect', () => {
                 this.model.logger('warn', { message: `Reconnecting to MQTT server ...` });
             });
             this.client.on('message', this._onMessage.bind(this));
-            resolve();
+            this.client.on('connect', () => {
+                resolve();
+            });
         });
     }
 
@@ -56,7 +59,7 @@ export class MQTTClient extends RemoteService {
 
             const messageId = this.registerPromise(resolve, reject);
             this.client.publish(
-                `node/${uid}/push`,
+                `${this.options.prefix}node/${uid}/push`,
                 JSON.stringify({
                     clientId: this.client.options.clientId,
                     messageId,
@@ -86,7 +89,7 @@ export class MQTTClient extends RemoteService {
 
             const messageId = this.registerPromise(resolve, reject);
             this.client.publish(
-                `node/${uid}/pull`,
+                `${this.options.prefix}node/${uid}/pull`,
                 JSON.stringify({
                     clientId: this.client.options.clientId,
                     messageId,
@@ -116,7 +119,7 @@ export class MQTTClient extends RemoteService {
 
             const messageId = this.registerPromise(resolve, reject);
             this.client.publish(
-                `node/${uid}/events/${event}`,
+                `${this.options.prefix}node/${uid}/events/${event}`,
                 JSON.stringify({
                     clientId: this.client.options.clientId,
                     messageId,
@@ -143,10 +146,10 @@ export class MQTTClient extends RemoteService {
             if (!this.client.connected || this.client.disconnecting) {
                 return resolve(undefined);
             }
-            
+
             const messageId = this.registerPromise(resolve, reject);
             this.client.publish(
-                `service/${uid}/${method}`,
+                `${this.options.prefix}service/${uid}/${method}`,
                 JSON.stringify({
                     clientId: this.client.options.clientId,
                     messageId,
@@ -161,7 +164,7 @@ export class MQTTClient extends RemoteService {
     }
 
     private _onMessage(topic: string, payload: Buffer): void {
-        const topicParts = topic.split('/');
+        const topicParts = topic.replace(this.options.prefix , '').split('/');
         const type = topicParts[0];
         const uid = topicParts[1];
         const action = topicParts[2];
@@ -295,19 +298,19 @@ export class MQTTClient extends RemoteService {
     /**
      * Register a remote client node
      *
-     * @param {Node<any, any>} node Node to register
+     * @param {MQTTSinkNode<any> | MQTTSourceNode<any>} node Node to register
      * @returns {boolean} Registration success
      */
-    public registerNode(node: Node<any, any>): this {
+    public registerNode(node: MQTTSinkNode<any> | MQTTSourceNode<any>): this {
         // Subscribe to all endpoints for the node
-        this.client.subscribe(`node/${node.uid}/push`);
-        this.client.subscribe(`node/${node.uid}/pull`);
-        this.client.subscribe(`node/${node.uid}/events/completed`);
-        this.client.subscribe(`node/${node.uid}/events/error`);
-        this.client.subscribe(`node/${node.uid}/push/response`);
-        this.client.subscribe(`node/${node.uid}/pull/response`);
-        this.client.subscribe(`node/${node.uid}/events/completed/response`);
-        this.client.subscribe(`node/${node.uid}/events/error/response`);
+        this.client.subscribe(`${this.options.prefix}node/${node.uid}/push`);
+        this.client.subscribe(`${this.options.prefix}node/${node.uid}/pull`);
+        this.client.subscribe(`${this.options.prefix}node/${node.uid}/events/completed`);
+        this.client.subscribe(`${this.options.prefix}node/${node.uid}/events/error`);
+        this.client.subscribe(`${this.options.prefix}node/${node.uid}/push/response`);
+        this.client.subscribe(`${this.options.prefix}node/${node.uid}/pull/response`);
+        this.client.subscribe(`${this.options.prefix}node/${node.uid}/events/completed/response`);
+        this.client.subscribe(`${this.options.prefix}node/${node.uid}/events/error/response`);
         return super.registerNode(node);
     }
 
@@ -319,8 +322,8 @@ export class MQTTClient extends RemoteService {
      */
     public registerService(service: Service): this {
         // Subscribe to all actions for the service
-        this.client.subscribe(`service/${service.uid}/*`);
-        this.client.subscribe(`service/${service.uid}/*/response`);
+        this.client.subscribe(`${this.options.prefix}service/${service.uid}/*`);
+        this.client.subscribe(`${this.options.prefix}service/${service.uid}/*/response`);
         return super.registerService(service);
     }
 }

@@ -6,26 +6,24 @@ import { MQTTServerOptions } from './MQTTServerOptions';
 import { MQTTClient } from '../../client/service/MQTTClient';
 import { MQTTClientOptions } from '../../client/service/MQTTClientOptions';
 import { WebSocket } from 'ws';
-import { Server as HTTPSServer, createServer as createServerHTTPS } from "https";
-import { Server as HTTPServer, createServer as createServerHTTP } from "http";
+import { Server as HTTPSServer, createServer as createServerHTTPS } from 'https';
+import { Server as HTTPServer, createServer as createServerHTTP } from 'http';
 
 /**
  * MQTT Server
  */
 export class MQTTServer extends MQTTClient {
     protected options: MQTTServerOptions & MQTTClientOptions;
-    protected server: Server | HTTPServer | HTTPServer;
-    protected aedes: Aedes;
+    server: Server | HTTPSServer | HTTPServer;
+    aedes: Aedes;
 
     constructor(options?: MQTTServerOptions) {
-        super();
-        this.options = {
+        super({
             url: '',
             ...(options || {
                 port: 1883,
             }),
-        };
-
+        });
         if (this.options.websocket) {
             this.options = {
                 keepalive: 30,
@@ -34,10 +32,10 @@ export class MQTTServer extends MQTTClient {
                 clean: true,
                 reconnectPeriod: 1000,
                 connectTimeout: 30 * 1000,
-                ...this.options
-            }
+                ...this.options,
+            };
         }
-        
+
         this.options.url =
             (this.options.websocket ? `ws${this.options.tls ? 's' : ''}://` : `mqtt://`) + `localhost:${options.port}`;
 
@@ -48,7 +46,7 @@ export class MQTTServer extends MQTTClient {
 
     private _onInitServer(): Promise<void> {
         return new Promise((resolve, reject) => {
-            const brokerId = 'BROKER_' + process.pid;
+            const brokerId = `BROKER_${process.pid}_${Math.random().toString(16).substring(2, 8)}`;
             this.aedes = (aedes as any)({
                 id: brokerId,
                 ...this.options,
@@ -71,38 +69,41 @@ export class MQTTServer extends MQTTClient {
                 );
             });
 
-            // Create websocket server
             if (this.options.websocket) {
+                // Create websocket server
                 if (this.options.tls) {
-                    this.server = createServerHTTPS(
-                        {
-                            key: this.options.key,
-                            cert: this.options.cert,
-                        }
-                    );
+                    this.server = createServerHTTPS({
+                        key: this.options.key,
+                        cert: this.options.cert,
+                    });
                 } else {
                     this.server = createServerHTTP();
                 }
-                const wss = new WebSocket.Server({ server: this.server as HTTPServer | HTTPServer })
+                const wss = new WebSocket.Server({ server: this.server as HTTPServer | HTTPServer });
                 wss.on('connection', (ws) => {
                     const duplex = WebSocket.createWebSocketStream(ws);
                     this.aedes.handle(duplex);
                 });
             } else {
+                // Create socket server
                 if (this.options.tls) {
                     this.server = createSecureServer(
                         {
                             key: this.options.key,
                             cert: this.options.cert,
                         },
-                        this.options.websocket ? undefined : this.aedes.handle,
+                        this.aedes.handle,
                     );
                 } else {
-                    this.server = createServer(this.options.websocket ? undefined : this.aedes.handle);
+                    this.server = createServer(this.aedes.handle);
                 }
             }
-            
-            this.server.listen(this.options.port, () => {
+
+            this.model.logger('debug', `Starting server on port ${this.options.port}: ${brokerId} ...`);
+            this.server.on('error', (error: Error) => {
+                this.model.logger('error', error.message);
+            });
+            this.server.on('listening', () => {
                 this.model.logger('info', `Server listening on port ${this.options.port}: ${brokerId}`);
                 this.connect()
                     .then(() => {
@@ -110,16 +111,20 @@ export class MQTTServer extends MQTTClient {
                     })
                     .catch(reject);
             });
+            this.server.listen(this.options.port);
         });
     }
 
     private _onDestroy(): Promise<void> {
         return new Promise((resolve, reject) => {
+            this.model.logger('info', `Closing MQTT server ...`);
             this.aedes.close(() => {
                 this.server.close((err?) => {
                     if (err) {
+                        this.model.logger('error', `Unable to close socket server!`);
                         return reject(err);
                     }
+                    this.model.logger('info', `MQTT server closed successfully!`);
                     resolve();
                 });
             });
