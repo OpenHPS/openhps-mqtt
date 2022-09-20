@@ -33,6 +33,8 @@ npm install @openhps/mqtt --save
 The MQTT module uses a broker for all communication. You can use the embedded MQTT server or use an external broker.
 
 ### Embedded MQTT Server
+Using the embedded MQTT server will use [Aedes](https://github.com/moscajs/aedes) as the broker. For more production
+ready deployments using a dedicated broker is recommended.
 ```typescript
 ModelBuilder.create()
     .addService(new MQTTServer({
@@ -71,6 +73,7 @@ The API is exactly the same as the client example.
 |\<uid\>/events/error|Topic to publish errors to a node with a certain \<uid\>|
 |\<uid\>/events/completed|Topic to publish completed event to a node with a certain \<uid\>|
 
+**Note:** A prefix an be added to the topics in case the broker is used for multiple positioning systems.
 ### Push Payload
 ```json
 {

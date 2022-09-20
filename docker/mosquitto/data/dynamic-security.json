@@ -1,0 +1,135 @@
+{
+	"defaultACLAccess":	{
+		"publishClientSend":	false,
+		"publishClientReceive":	true,
+		"subscribe":	false,
+		"unsubscribe":	true
+	},
+	"clients":	[{
+			"username":	"cedalo",
+			"textname":	"Admin user",
+			"roles":	[{
+					"rolename":	"dynsec-admin"
+				}, {
+					"rolename":	"sys-observe"
+				}, {
+					"rolename":	"topic-observe"
+				}],
+			"password":	"9JN5Xoxng0bpFWpDRb2FU3zIDIZrPgBqGlCctMXhUPlXvbuaxit2PVPV+0GYRS5U82hlsXhrtNUrLkfxXTnBsw==",
+			"salt":	"gBoNDRtmV7EWyoHp",
+			"iterations":	101
+		}, {
+			"username":	"openhps-scanner",
+			"textname":	"",
+			"textdescription":	"",
+			"roles":	[{
+					"rolename":	"client"
+				}],
+			"password":	"7J5BKMJO34tuJl0ns4IRcbnkgpmik3NW30jCUwPuQJQ41CxUZy9F+DeWPoN6ymaocqaoDK10wJ7ZqSClC2nt7Q==",
+			"salt":	"uT3OFIcrkF2Tnaud",
+			"iterations":	101
+		}],
+	"groups":	[{
+			"groupname":	"scanners",
+			"textname":	"",
+			"textdescription":	"",
+			"roles":	[],
+			"clients":	[{
+					"username":	"openhps-scanner"
+				}]
+		}],
+	"roles":	[{
+			"rolename":	"client",
+			"textdescription":	"Read/write access to the full application topic hierarchy.",
+			"acls":	[{
+					"acltype":	"publishClientSend",
+					"topic":	"#",
+					"priority":	0,
+					"allow":	true
+				}, {
+					"acltype":	"publishClientReceive",
+					"topic":	"#",
+					"priority":	0,
+					"allow":	true
+				}, {
+					"acltype":	"subscribePattern",
+					"topic":	"#",
+					"priority":	0,
+					"allow":	true
+				}, {
+					"acltype":	"unsubscribePattern",
+					"topic":	"#",
+					"priority":	0,
+					"allow":	true
+				}]
+		}, {
+			"rolename":	"dynsec-admin",
+			"textname":	"",
+			"textdescription":	"Grants access to administer clients/groups/roles.",
+			"acls":	[{
+					"acltype":	"publishClientSend",
+					"topic":	"$CONTROL/dynamic-security/#",
+					"priority":	0,
+					"allow":	true
+				}, {
+					"acltype":	"publishClientReceive",
+					"topic":	"$CONTROL/dynamic-security/#",
+					"priority":	0,
+					"allow":	true
+				}, {
+					"acltype":	"subscribePattern",
+					"topic":	"$CONTROL/dynamic-security/#",
+					"priority":	0,
+					"allow":	true
+				}]
+		}, {
+			"rolename":	"scanner-role",
+			"textname":	"",
+			"textdescription":	"",
+			"acls":	[]
+		}, {
+			"rolename":	"sys-notify",
+			"textname":	"",
+			"textdescription":	"Allow bridges to publish connection state messages.",
+			"acls":	[{
+					"acltype":	"publishClientSend",
+					"topic":	"$SYS/broker/connection/+/state",
+					"priority":	0,
+					"allow":	true
+				}]
+		}, {
+			"rolename":	"sys-observe",
+			"textname":	"",
+			"textdescription":	"Observe the $SYS topic hierarchy.",
+			"acls":	[{
+					"acltype":	"publishClientReceive",
+					"topic":	"$SYS/#",
+					"priority":	0,
+					"allow":	true
+				}, {
+					"acltype":	"subscribePattern",
+					"topic":	"$SYS/#",
+					"priority":	0,
+					"allow":	true
+				}]
+		}, {
+			"rolename":	"topic-observe",
+			"textdescription":	"Read only access to the full application topic hierarchy.",
+			"acls":	[{
+					"acltype":	"publishClientReceive",
+					"topic":	"#",
+					"priority":	0,
+					"allow":	true
+				}, {
+					"acltype":	"subscribePattern",
+					"topic":	"#",
+					"priority":	0,
+					"allow":	true
+				}, {
+					"acltype":	"unsubscribePattern",
+					"topic":	"#",
+					"priority":	0,
+					"allow":	true
+				}]
+		}]
+}
