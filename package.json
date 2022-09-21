@@ -57,7 +57,7 @@
     "mqtt"
   ],
   "dependencies": {
-    "aedes": "^0.48.0",
+    "aedes": "0.47.0",
     "mqtt": "^4.3.7",
     "protobufjs": "^7.1.1",
     "ws": "^8.8.1"

@@ -82,7 +82,7 @@ export class MQTTServer extends MQTTClient {
                 const wss = new WebSocket.Server({ server: this.server as HTTPServer | HTTPServer });
                 wss.on('connection', (ws) => {
                     const duplex = WebSocket.createWebSocketStream(ws);
-                    this.aedes.handle(duplex, undefined);
+                    this.aedes.handle(duplex);
                 });
             } else {
                 // Create socket server
