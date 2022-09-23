@@ -115,7 +115,6 @@ describe('node client', () => {
                             url: 'ws://localhost:1443',
                             prefix: 'openhps/model/'
                         }))
-                        .withLogger(console.log)
                         .from(new MQTTSourceNode({
                             uid: "sink"
                         }))
@@ -132,6 +131,58 @@ describe('node client', () => {
                     done(ex);
                 });
         }).timeout(50000);
+
+        it('should support custom topics', (done) => {
+            let clientModel: Model<any, any>;
+            let serverModel: Model<any, any>;
+
+            ModelBuilder.create()
+                .addService(new MQTTServer({
+                    port: 1443,
+                    websocket: true,
+                }))
+                .from(new CallbackSourceNode(() => {
+                    return undefined;
+                }))
+                .to(new MQTTSinkNode({
+                    uid: "sink",
+                    topic: {
+                        push: 'openhps/scanner/00:11:22:33:44/ble',
+                        pull: 'openhps/scanner/00:11:22:33:44/ble',
+                        event: 'openhps/scanner/00:11:22:33:44/event',
+                    }
+                }))
+                .build().then(model => {
+                    serverModel = model;
+                    ModelBuilder.create()
+                        .addService(new MQTTClient({
+                            url: 'ws://localhost:1443',
+                        }))
+                        .from(new MQTTSourceNode({
+                            uid: "sink",
+                            topic: {
+                                push: 'openhps/scanner/+/ble',
+                                pull: 'openhps/scanner/+/ble',
+                                event: 'openhps/scanner/+/event',
+                            }
+                        }))
+                        .to(new CallbackSinkNode(frame => {
+                            clientModel.emit('destroy');
+                            serverModel.emit('destroy');
+                            done();
+                        }))
+                        .build().then(model => {
+                            setTimeout(() => {
+                                clientModel = model;
+                                serverModel.push(new DataFrame());
+                            }, 1000);
+                        }).catch(ex => {
+                            done(ex);
+                        });
+                }).catch(ex => {
+                    done(ex);
+                });
+        }).timeout(5000);
 
         it('should forward server pushes to the client', (done) => {
             let clientModel: Model<any, any>;
@@ -172,7 +223,7 @@ describe('node client', () => {
                 }).catch(ex => {
                     done(ex);
                 });
-        }).timeout(50000);
+        }).timeout(5000);
 
         it('should forward client errors to the server', (done) => {
             let clientModel: Model<any, any>;
@@ -216,7 +267,7 @@ describe('node client', () => {
                 }).catch(ex => {
                     done(ex);
                 });
-        }).timeout(50000);
+        }).timeout(5000);
 
         it('should forward client completed events to the server', (done) => {
             let clientModel: Model<any, any>;
@@ -262,7 +313,7 @@ describe('node client', () => {
                 }).catch(ex => {
                     done(ex);
                 });
-        }).timeout(50000);
+        }).timeout(5000);
         
     });
 });

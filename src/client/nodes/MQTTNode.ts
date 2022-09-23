@@ -1,5 +1,6 @@
-import { DataFrame, NodeOptions, RemoteNode, RemoteNodeOptions } from '@openhps/core';
+import { DataFrame, RemoteNode, RemoteNodeOptions } from '@openhps/core';
 import { MQTTClient } from '../service/MQTTClient';
+import { MQTTNodeOptions } from './MQTTNodeOptions';
 
 export class MQTTNode<In extends DataFrame, Out extends DataFrame> extends RemoteNode<In, Out, MQTTClient> {
     protected options: MQTTNodeOptions & RemoteNodeOptions<MQTTClient>;
@@ -8,5 +9,3 @@ export class MQTTNode<In extends DataFrame, Out extends DataFrame> extends Remot
         super({ service: MQTTClient, ...options });
     }
 }
-
-export type MQTTNodeOptions = NodeOptions;
