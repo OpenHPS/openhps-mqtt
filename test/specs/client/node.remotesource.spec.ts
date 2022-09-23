@@ -1,7 +1,8 @@
 import { expect } from 'chai';
 import 'mocha';
 import { ModelBuilder, Model, DataFrame, DataObject, CallbackSinkNode, CallbackSourceNode } from '@openhps/core';
-import { MQTTClient, MQTTServer, MQTTSinkNode, MQTTSourceNode } from '../../../src';
+import { MQTTClient, MQTTPushOptions, MQTTServer, MQTTSinkNode, MQTTSourceNode } from '../../../src';
+import { Client, connect } from 'mqtt';
 
 describe('node client', () => {
     describe('remote source', () => {
@@ -46,7 +47,7 @@ describe('node client', () => {
                 }).catch(ex => {
                     done(ex);
                 });
-        }).timeout(50000);
+        }).timeout(5000);
 
         it('should connect to a websocket server', (done) => {
             let clientModel: Model<any, any>;
@@ -87,7 +88,7 @@ describe('node client', () => {
                 }).catch(ex => {
                     done(ex);
                 });
-        }).timeout(50000);
+        }).timeout(5000);
 
         it('should support topic prefixes', (done) => {
             let clientModel: Model<any, any>;
@@ -130,7 +131,7 @@ describe('node client', () => {
                 }).catch(ex => {
                     done(ex);
                 });
-        }).timeout(50000);
+        }).timeout(5000);
 
         it('should support custom topics', (done) => {
             let clientModel: Model<any, any>;
@@ -146,11 +147,7 @@ describe('node client', () => {
                 }))
                 .to(new MQTTSinkNode({
                     uid: "sink",
-                    topic: {
-                        push: 'openhps/scanner/00:11:22:33:44/ble',
-                        pull: 'openhps/scanner/00:11:22:33:44/ble',
-                        event: 'openhps/scanner/00:11:22:33:44/event',
-                    }
+                    push: { topic: 'openhps/scanner/00:11:22:33:44/ble' },
                 }))
                 .build().then(model => {
                     serverModel = model;
@@ -160,11 +157,7 @@ describe('node client', () => {
                         }))
                         .from(new MQTTSourceNode({
                             uid: "sink",
-                            topic: {
-                                push: 'openhps/scanner/+/ble',
-                                pull: 'openhps/scanner/+/ble',
-                                event: 'openhps/scanner/+/event',
-                            }
+                            push: { topic: 'openhps/scanner/+/ble' },
                         }))
                         .to(new CallbackSinkNode(frame => {
                             clientModel.emit('destroy');
@@ -179,6 +172,40 @@ describe('node client', () => {
                         }).catch(ex => {
                             done(ex);
                         });
+                }).catch(ex => {
+                    done(ex);
+                });
+        }).timeout(5000);
+
+        it('should support custom deserializers', (done) => {
+            let serverModel: Model<any, any>;
+            let client: Client;
+            ModelBuilder.create()
+                .addService(new MQTTServer({
+                    port: 1443,
+                    websocket: true,
+                }))
+                .from(new MQTTSourceNode({
+                    uid: "sink",
+                    push: { topic: 'openhps/scanner/+/ble', response: false },
+                    deserialize: (data: any, options?: MQTTPushOptions) => {
+                        console.log(data, options);
+                        return new DataFrame();
+                    }
+                }))
+                .to(new CallbackSinkNode(frame => {
+                    serverModel.emit('destroy');
+                    client.end();
+                    done();
+                }))
+                .build().then(model => {
+                    serverModel = model;
+                    client = connect("ws://localhost:1443");
+                    client.publish("openhps/scanner/00:11:22:33:44/ble", JSON.stringify({
+                        timestamp: Date.now(),
+                        address: "abc",
+                        rssi: -10
+                    }));
                 }).catch(ex => {
                     done(ex);
                 });

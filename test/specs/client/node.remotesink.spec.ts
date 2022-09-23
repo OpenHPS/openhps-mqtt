@@ -47,7 +47,7 @@ describe('node client', () => {
                 }).catch(ex => {
                     done(ex);
                 });
-        }).timeout(50000);
+        }).timeout(5000);
 
         it('should connect to a websocket server', (done) => {
             let clientModel: Model<any, any>;
@@ -92,7 +92,7 @@ describe('node client', () => {
                 }).catch(ex => {
                     done(ex);
                 });
-        }).timeout(50000);
+        }).timeout(5000);
 
         it('should forward server pulls to the client', (done) => {
             let clientModel: Model<any, any>;

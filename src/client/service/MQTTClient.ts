@@ -1,4 +1,14 @@
-import { DataFrame, DataSerializer, Node, PullOptions, PushOptions, RemoteService, Service } from '@openhps/core';
+import {
+    DataFrame,
+    Node,
+    PullOptions,
+    PushOptions,
+    RemoteNode,
+    RemoteService,
+    Service,
+    SinkNode,
+    SourceNode,
+} from '@openhps/core';
 import { Client, connect } from 'mqtt';
 import { MQTTNodeOptions } from '../nodes/MQTTNodeOptions';
 import { MQTTPullOptions } from '../nodes/MQTTPullOptions';
@@ -62,22 +72,24 @@ export class MQTTClient extends RemoteService {
             }
 
             const node = this.model.findNodeByUID(uid) as Node<any, any>;
-            const nodeOptions = node.getOptions() as MQTTNodeOptions;
+            const nodeOptions = node.getOptions() as MQTTNodeOptions<this>;
 
-            if (nodeOptions.topic.push.includes('+')) {
+            if (!nodeOptions.push) {
+                return resolve();
+            }
+
+            if (nodeOptions.push.topic.includes('+')) {
                 return reject(
-                    new Error(`Unable to push '${nodeOptions.topic.push}'! Wildcards are not supported for pushing!`),
+                    new Error(`Unable to push '${nodeOptions.push}'! Wildcards are not supported for pushing!`),
                 );
             }
 
-            const messageId = this.registerPromise(resolve, reject);
+            const messageId = nodeOptions.push.response ? this.registerPromise(resolve, reject) : undefined;
             this.client.publish(
-                nodeOptions.topic.push,
+                nodeOptions.push.topic,
                 JSON.stringify({
-                    clientId: this.client.options.clientId,
                     messageId,
-                    frame: DataSerializer.serialize(frame),
-                    options,
+                    ...nodeOptions.serialize(frame as DataFrame, options),
                 }),
                 {
                     qos: this.options.qos,
@@ -101,19 +113,22 @@ export class MQTTClient extends RemoteService {
             }
 
             const node = this.model.findNodeByUID(uid) as Node<any, any>;
-            const nodeOptions = node.getOptions() as MQTTNodeOptions;
+            const nodeOptions = node.getOptions() as MQTTNodeOptions<this>;
 
-            if (nodeOptions.topic.pull.includes('+')) {
+            if (!nodeOptions.pull) {
+                return resolve();
+            }
+
+            if (nodeOptions.pull.topic.includes('+')) {
                 return reject(
-                    new Error(`Unable to pull '${nodeOptions.topic.pull}'! Wildcards are not supported for pulling!`),
+                    new Error(`Unable to pull '${nodeOptions.pull}'! Wildcards are not supported for pulling!`),
                 );
             }
 
-            const messageId = this.registerPromise(resolve, reject);
+            const messageId = nodeOptions.pull.response ? this.registerPromise(resolve, reject) : undefined;
             this.client.publish(
-                nodeOptions.topic.pull,
+                nodeOptions.pull.topic,
                 JSON.stringify({
-                    clientId: this.client.options.clientId,
                     messageId,
                     options,
                 }),
@@ -140,18 +155,21 @@ export class MQTTClient extends RemoteService {
             }
 
             const node = this.model.findNodeByUID(uid) as Node<any, any>;
-            const options = node.getOptions() as MQTTNodeOptions;
+            const nodeOptions = node.getOptions() as MQTTNodeOptions<this>;
 
-            if (options.topic.event.includes('+')) {
+            if (!nodeOptions.event) {
+                return resolve();
+            }
+
+            if (nodeOptions.event.topic.includes('+')) {
                 // Ignore
                 return;
             }
 
-            const messageId = this.registerPromise(resolve, reject);
+            const messageId = nodeOptions.event.response ? this.registerPromise(resolve, reject) : undefined;
             this.client.publish(
-                `${options.topic.event}/${event}`,
+                `${nodeOptions.event.topic}/${event}`,
                 JSON.stringify({
-                    clientId: this.client.options.clientId,
                     messageId,
                     args,
                 }),
@@ -181,7 +199,6 @@ export class MQTTClient extends RemoteService {
             this.client.publish(
                 `${this.options.prefix}service/${uid}/${method}`,
                 JSON.stringify({
-                    clientId: this.client.options.clientId,
                     messageId,
                     args,
                 }),
@@ -193,117 +210,123 @@ export class MQTTClient extends RemoteService {
         });
     }
 
-    private _onPushAction(clientId: string, uid: string, topic: string, data: any): void {
+    private _onPushAction(mapping: Topic, topic: string, data: any): void {
         Promise.resolve(
-            this.localPush(uid, data.frame, {
+            this.localPush(mapping.uid, mapping.response ? data.frame : data, {
                 topic,
-                clientId,
                 ...data.options,
             } as MQTTPushOptions),
         )
             .then(() => {
-                this.client.publish(
-                    topic + '/response',
-                    JSON.stringify({
-                        clientId: this.client.options.clientId,
-                        messageId: data.messageId,
-                        status: 'ok',
-                    }),
-                );
+                if (mapping.response) {
+                    this.client.publish(
+                        topic + '/response',
+                        JSON.stringify({
+                            messageId: data.messageId,
+                            status: 'ok',
+                        }),
+                    );
+                }
             })
             .catch((ex) => {
-                this.client.publish(
-                    topic + '/response',
-                    JSON.stringify({
-                        clientId: this.client.options.clientId,
-                        messageId: data.messageId,
-                        status: 'error',
-                        error: ex,
-                    }),
-                );
+                if (mapping.response) {
+                    this.client.publish(
+                        topic + '/response',
+                        JSON.stringify({
+                            messageId: data.messageId,
+                            status: 'error',
+                            error: ex,
+                        }),
+                    );
+                }
             });
     }
 
-    private _onPullAction(clientId: string, uid: string, topic: string, data: any): void {
+    private _onPullAction(mapping: Topic, topic: string, data: any): void {
         Promise.resolve(
-            this.localPull(uid, {
+            this.localPull(mapping.uid, {
                 topic,
-                clientId,
-                ...data.options,
+                ...data,
             } as MQTTPullOptions),
         )
             .then(() => {
-                this.client.publish(
-                    topic + '/response',
-                    JSON.stringify({
-                        clientId: this.client.options.clientId,
-                        messageId: data.messageId,
-                        status: 'ok',
-                    }),
-                );
+                if (mapping.response) {
+                    this.client.publish(
+                        topic + '/response',
+                        JSON.stringify({
+                            messageId: data.messageId,
+                            status: 'ok',
+                        }),
+                    );
+                }
             })
             .catch((ex) => {
-                this.client.publish(
-                    topic + '/response',
-                    JSON.stringify({
-                        clientId: this.client.options.clientId,
-                        messageId: data.messageId,
-                        status: 'error',
-                        error: ex,
-                    }),
-                );
+                if (mapping.response) {
+                    this.client.publish(
+                        topic + '/response',
+                        JSON.stringify({
+                            messageId: data.messageId,
+                            status: 'error',
+                            error: ex,
+                        }),
+                    );
+                }
             });
     }
 
-    private _onEventAction(uid: string, topic: string, event: string, data: any): void {
-        Promise.resolve(this.localEvent(uid, event, data))
+    private _onEventAction(mapping: Topic, topic: string, event: string, data: any): void {
+        Promise.resolve(this.localEvent(mapping.uid, event, data))
             .then((result: any) => {
-                this.client.publish(
-                    topic + '/response',
-                    JSON.stringify({
-                        clientId: this.client.options.clientId,
-                        messageId: data.messageId,
-                        status: 'ok',
-                        result,
-                    }),
-                );
+                if (mapping.response) {
+                    this.client.publish(
+                        topic + '/response',
+                        JSON.stringify({
+                            messageId: data.messageId,
+                            status: 'ok',
+                            result,
+                        }),
+                    );
+                }
             })
             .catch((ex) => {
-                this.client.publish(
-                    topic + '/response',
-                    JSON.stringify({
-                        clientId: this.client.options.clientId,
-                        messageId: data.messageId,
-                        status: 'error',
-                        error: ex,
-                    }),
-                );
+                if (mapping.response) {
+                    this.client.publish(
+                        topic + '/response',
+                        JSON.stringify({
+                            messageId: data.messageId,
+                            status: 'error',
+                            error: ex,
+                        }),
+                    );
+                }
             });
     }
 
-    private _onServiceAction(uid: string, topic: string, action: string, ...data: any): void {
-        Promise.resolve(this.localServiceCall(uid, action, ...data))
+    private _onServiceAction(mapping: Topic, topic: string, action: string, ...data: any): void {
+        Promise.resolve(this.localServiceCall(mapping.uid, action, ...data))
             .then((result: any) => {
-                this.client.publish(
-                    topic + '/response',
-                    JSON.stringify({
-                        clientId: this.client.options.clientId,
-                        messageId: data.messageId,
-                        status: 'ok',
-                        result,
-                    }),
-                );
+                if (mapping.response) {
+                    this.client.publish(
+                        topic + '/response',
+                        JSON.stringify({
+                            messageId: data.messageId,
+                            status: 'ok',
+                            result,
+                        }),
+                    );
+                }
             })
             .catch((ex) => {
-                this.client.publish(
-                    topic + '/response',
-                    JSON.stringify({
-                        clientId: this.client.options.clientId,
-                        messageId: data.messageId,
-                        status: 'error',
-                        error: ex,
-                    }),
-                );
+                if (mapping.response) {
+                    this.client.publish(
+                        topic + '/response',
+                        JSON.stringify({
+                            messageId: data.messageId,
+                            status: 'error',
+                            error: ex,
+                        }),
+                    );
+                }
             });
     }
 
@@ -320,12 +343,6 @@ export class MQTTClient extends RemoteService {
         const response = topicParts[topicParts.length - 1] === 'response';
 
         const data: any = JSON.parse(payload.toString());
-
-        // Check if message send by self
-        if (data.clientId === this.client.options.clientId) {
-            return;
-        }
-
         if (response) {
             const promise = this.getPromise(data.messageId);
             if (!promise) {
@@ -340,16 +357,16 @@ export class MQTTClient extends RemoteService {
 
         switch (topicMapping.action) {
             case 'push':
-                this._onPushAction(data.clientId, topicMapping.uid, topic, data);
+                this._onPushAction(topicMapping, topic, data);
                 break;
             case 'pull':
-                this._onPullAction(data.clientId, topicMapping.uid, topic, data);
+                this._onPullAction(topicMapping, topic, data);
                 break;
             case 'event':
-                this._onEventAction(topicMapping.uid, topic, topicParts[topicParts.length - 1], data);
+                this._onEventAction(topicMapping, topic, topicParts[topicParts.length - 1], data);
                 break;
             case 'service':
-                this._onServiceAction(topicMapping.uid, topic, topicParts[topicParts.length - 1], ...data);
+                this._onServiceAction(topicMapping, topic, topicParts[topicParts.length - 1], ...data);
                 break;
             default:
                 // Unsupported message
@@ -360,42 +377,56 @@ export class MQTTClient extends RemoteService {
     /**
      * Register a remote client node
      *
-     * @param {Node<any, any>} node Node to register
+     * @param {RemoteNode<any, any, this>} node Node to register
      * @returns {Promise<void>} Registration promise
      */
-    public registerNode(node: Node<any, any>): Promise<void> {
+    public registerNode(node: RemoteNode<any, any, this>): Promise<void> {
         return new Promise((resolve, reject) => {
-            const options = node.getOptions() as MQTTNodeOptions;
-            if (!options.topic) {
+            const options = node.getOptions() as MQTTNodeOptions<this>;
+            if (!options.push && !options.pull && !options.event) {
                 // Subscribe to all endpoints for the node
-                options.topic = {
-                    push: `${this.options.prefix}node/${node.uid}/push`,
-                    pull: `${this.options.prefix}node/${node.uid}/pull`,
-                    event: `${this.options.prefix}node/${node.uid}/event`,
-                };
+                options.push = { topic: `${this.options.prefix}node/${node.uid}/push`, response: true };
+                options.pull = { topic: `${this.options.prefix}node/${node.uid}/pull`, response: true };
+                options.event = { topic: `${this.options.prefix}node/${node.uid}/event`, response: true };
             }
 
-            const topics: Topic[] = [
-                { topic: `${options.topic.push}`, action: 'push', uid: node.uid },
-                { topic: `${options.topic.pull}`, action: 'pull', uid: node.uid },
-                { topic: `${options.topic.event}/+`, action: 'event', uid: node.uid },
-            ];
+            const subscribe: string[] = [];
 
-            this.topics.push(...topics);
+            if (node.proxyNode instanceof SourceNode) {
+                if (options.pull) {
+                    this.topics.push({ topic: `${options.pull.topic}/response`, action: 'pull', uid: node.uid });
+                    subscribe.push(`${options.pull.topic}/response`);
+                }
 
-            this.client.subscribe(
-                topics
-                    .map((topic) => {
-                        return [topic.topic, `${topic.topic}/response`];
-                    })
-                    .reduce((a, b) => a.concat(b)),
-                (err: Error) => {
-                    if (err) {
-                        return reject(err);
-                    }
-                    super.registerNode(node).then(resolve).catch(reject);
-                },
-            );
+                if (options.push) {
+                    this.topics.push({ topic: `${options.push.topic}`, action: 'push', uid: node.uid });
+                    subscribe.push(`${options.push.topic}`);
+                }
+            } else if (node.proxyNode instanceof SinkNode) {
+                if (options.pull) {
+                    this.topics.push({ topic: `${options.pull.topic}`, action: 'pull', uid: node.uid });
+                    subscribe.push(`${options.pull.topic}`);
+                }
+
+                if (options.push) {
+                    this.topics.push({ topic: `${options.push.topic}/response`, action: 'push', uid: node.uid });
+                    subscribe.push(`${options.push.topic}/response`);
+                }
+
+                if (options.event) {
+                    this.topics.push({ topic: `${options.event.topic}/+`, action: 'event', uid: node.uid });
+                    this.topics.push({ topic: `${options.event.topic}/+/response`, action: 'event', uid: node.uid });
+                    subscribe.push(`${options.event.topic}/+`);
+                    subscribe.push(`${options.event.topic}/+/response`);
+                }
+            }
+
+            this.client.subscribe(subscribe, (err: Error) => {
+                if (err) {
+                    return reject(err);
+                }
+                super.registerNode(node).then(resolve).catch(reject);
+            });
         });
     }
 
@@ -435,4 +466,5 @@ interface Topic {
     topic: string;
     action: 'push' | 'pull' | 'event' | 'service';
     uid: string;
+    response?: boolean;
 }
