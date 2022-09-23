@@ -24,11 +24,11 @@ export class MQTTClient extends RemoteService {
         return new Promise((resolve) => {
             this.client = connect(this.options.url, this.options);
             this.client.on('error', (error) => {
-                this.model.logger('error', { message: `Connection error: ${error.message}`, error });
+                this.model.logger('error', `Connection error: ${error.message}`, error);
                 this.client?.end();
             });
             this.client.on('reconnect', () => {
-                this.model.logger('warn', { message: `Reconnecting to MQTT server ...` });
+                this.model.logger('warn', `Reconnecting to MQTT server ...`);
             });
             this.client.on('message', this._onMessage.bind(this));
             this.client.on('connect', () => {
@@ -326,28 +326,37 @@ export class MQTTClient extends RemoteService {
      * Register a remote client node
      *
      * @param {Node<any, any>} node Node to register
-     * @returns {boolean} Registration success
+     * @returns {Promise<void>} Registration promise
      */
-    public registerNode(node: Node<any, any>): this {
-        // Subscribe to all endpoints for the node
-        this.client.subscribe(`${this.options.prefix}node/${node.uid}/push`);
-        this.client.subscribe(`${this.options.prefix}node/${node.uid}/pull`);
-        this.client.subscribe(`${this.options.prefix}node/${node.uid}/event/completed`);
-        this.client.subscribe(`${this.options.prefix}node/${node.uid}/event/error`);
-        this.client.subscribe(`${this.options.prefix}node/${node.uid}/push/response`);
-        this.client.subscribe(`${this.options.prefix}node/${node.uid}/pull/response`);
-        this.client.subscribe(`${this.options.prefix}node/${node.uid}/event/completed/response`);
-        this.client.subscribe(`${this.options.prefix}node/${node.uid}/event/error/response`);
-        return super.registerNode(node);
+    public registerNode(node: Node<any, any>): Promise<void> {
+        return new Promise((resolve, reject) => {
+            // Subscribe to all endpoints for the node
+            const topics: string[] = [
+                `${this.options.prefix}node/${node.uid}/push`,
+                `${this.options.prefix}node/${node.uid}/push/response`,
+                `${this.options.prefix}node/${node.uid}/pull`,
+                `${this.options.prefix}node/${node.uid}/pull/response`,
+                `${this.options.prefix}node/${node.uid}/event/completed`,
+                `${this.options.prefix}node/${node.uid}/event/completed/response`,
+                `${this.options.prefix}node/${node.uid}/event/error`,
+                `${this.options.prefix}node/${node.uid}/event/error/response`,
+            ];
+            this.client.subscribe(topics, (err: Error) => {
+                if (err) {
+                    return reject(err);
+                }
+                super.registerNode(node).then(resolve).catch(reject);
+            });
+        });
     }
 
     /**
      * Register a remote client service
      *
      * @param {Service} service Service to register
-     * @returns {boolean} Registration success
+     * @returns {Promise<void>} Registration promise
      */
-    public registerService(service: Service): this {
+    public registerService(service: Service): Promise<void> {
         // Subscribe to all actions for the service
         this.client.subscribe(`${this.options.prefix}service/${service.uid}/*`);
         this.client.subscribe(`${this.options.prefix}service/${service.uid}/*/response`);
