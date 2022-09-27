@@ -210,15 +210,15 @@ export class MQTTClient extends RemoteService {
         });
     }
 
-    private _onPushAction(mapping: Topic, topic: string, data: any): void {
+    private _onPushAction(mapping: Topic, topic: string, data: any, payload: Buffer): void {
         Promise.resolve(
-            this.localPush(mapping.uid, mapping.response ? data.frame : data, {
+            this.localPush(mapping.uid, data ? (mapping.response ? data.frame : data) : payload, {
                 topic,
-                ...data.options,
+                ...(data ? data.options : {}),
             } as MQTTPushOptions),
         )
             .then(() => {
-                if (mapping.response) {
+                if (mapping.response && data) {
                     this.client.publish(
                         topic + '/response',
                         JSON.stringify({
@@ -229,7 +229,7 @@ export class MQTTClient extends RemoteService {
                 }
             })
             .catch((ex) => {
-                if (mapping.response) {
+                if (mapping.response && data) {
                     this.client.publish(
                         topic + '/response',
                         JSON.stringify({
@@ -342,7 +342,13 @@ export class MQTTClient extends RemoteService {
         const topicParts = topic.replace(this.options.prefix, '').split('/');
         const response = topicParts[topicParts.length - 1] === 'response';
 
-        const data: any = JSON.parse(payload.toString());
+        let data: any = undefined;
+        try {
+            data = JSON.parse(payload.toString());
+        } catch (_) {
+            // Ignore error
+        }
+
         if (response) {
             const promise = this.getPromise(data.messageId);
             if (!promise) {
@@ -357,7 +363,7 @@ export class MQTTClient extends RemoteService {
 
         switch (topicMapping.action) {
             case 'push':
-                this._onPushAction(topicMapping, topic, data);
+                this._onPushAction(topicMapping, topic, data, payload);
                 break;
             case 'pull':
                 this._onPullAction(topicMapping, topic, data);

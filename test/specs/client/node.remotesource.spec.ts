@@ -211,6 +211,36 @@ describe('node client', () => {
                 });
         }).timeout(5000);
 
+        it('should support non json data', (done) => {
+            let serverModel: Model<any, any>;
+            let client: Client;
+            ModelBuilder.create()
+                .addService(new MQTTServer({
+                    port: 1443,
+                    websocket: true,
+                }))
+                .from(new MQTTSourceNode({
+                    uid: "sink",
+                    push: { topic: 'openhps/scanner/+/ble', response: false },
+                    deserialize: (data: any, options?: MQTTPushOptions) => {
+                        console.log(data, options);
+                        return new DataFrame();
+                    }
+                }))
+                .to(new CallbackSinkNode(frame => {
+                    serverModel.emit('destroy');
+                    client.end();
+                    done();
+                }))
+                .build().then(model => {
+                    serverModel = model;
+                    client = connect("ws://localhost:1443");
+                    client.publish("openhps/scanner/00:11:22:33:44/ble", Buffer.from("test"));
+                }).catch(ex => {
+                    done(ex);
+                });
+        }).timeout(5000);
+
         it('should forward server pushes to the client', (done) => {
             let clientModel: Model<any, any>;
             let serverModel: Model<any, any>;
