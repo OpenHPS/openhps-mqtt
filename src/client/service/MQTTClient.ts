@@ -15,6 +15,7 @@ export class MQTTClient extends RemoteService {
             clientId: `CLIENT_${process.pid}_${Math.random().toString(16).substring(2, 8)}`,
             ...options,
         };
+        this.options.prefix == this.options.prefix ?? '';
 
         this.once('build', this.connect.bind(this));
         this.once('destroy', this.disconnect.bind(this));
@@ -329,16 +330,26 @@ export class MQTTClient extends RemoteService {
      * @returns {boolean} Registration success
      */
     public registerNode(node: Node<any, any>): this {
-        // Subscribe to all endpoints for the node
-        this.client.subscribe(`${this.options.prefix}node/${node.uid}/push`);
-        this.client.subscribe(`${this.options.prefix}node/${node.uid}/pull`);
-        this.client.subscribe(`${this.options.prefix}node/${node.uid}/event/completed`);
-        this.client.subscribe(`${this.options.prefix}node/${node.uid}/event/error`);
-        this.client.subscribe(`${this.options.prefix}node/${node.uid}/push/response`);
-        this.client.subscribe(`${this.options.prefix}node/${node.uid}/pull/response`);
-        this.client.subscribe(`${this.options.prefix}node/${node.uid}/event/completed/response`);
-        this.client.subscribe(`${this.options.prefix}node/${node.uid}/event/error/response`);
-        return super.registerNode(node);
+        return new Promise((resolve, reject) => {
+            // Subscribe to all endpoints for the node
+            const topics = [
+                `${this.options.prefix}node/${node.uid}/push`,
+                `${this.options.prefix}node/${node.uid}/pull`,
+                `${this.options.prefix}node/${node.uid}/push/response`,
+                `${this.options.prefix}node/${node.uid}/pull/response`,
+                `${this.options.prefix}node/${node.uid}/event/completed`,
+                `${this.options.prefix}node/${node.uid}/event/error`,
+                `${this.options.prefix}node/${node.uid}/event/completed/response`,
+                `${this.options.prefix}node/${node.uid}/event/error/response`
+            ];
+
+            this.client.subscribe(topics, (err: Error) => {
+                if (err) {
+                    return 
+                }
+            });
+            return super.registerNode(node);
+        });
     }
 
     /**
