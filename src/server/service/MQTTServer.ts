@@ -54,9 +54,9 @@ export class MQTTServer extends MQTTClient {
             this.aedes.on('subscribe', (subscriptions, client) => {
                 this.model.logger(
                     'info',
-                    'MQTT client \x1b[32m' +
+                    'MQTT client [' +
                         (client ? client.id : client) +
-                        '\x1b[0m subscribed to topics: ' +
+                        '] subscribed to topics: ' +
                         subscriptions.map((s) => s.topic).join('\n') +
                         ' from broker ' +
                         brokerId,
@@ -65,7 +65,7 @@ export class MQTTServer extends MQTTClient {
             this.aedes.on('client', (client) => {
                 this.model.logger(
                     'info',
-                    'Client Connected: \x1b[33m' + (client ? client.id : client) + '\x1b[0m' + ' to broker ' + brokerId,
+                    'Client Connected: [' + (client ? client.id : client) + ']' + ' to broker ' + brokerId,
                 );
             });
 

@@ -3,3 +3,4 @@ export * from './source';
 export * from './MQTTNode';
 export * from './MQTTPushOptions';
 export * from './MQTTPullOptions';
+export * from './MQTTNodeOptions';
