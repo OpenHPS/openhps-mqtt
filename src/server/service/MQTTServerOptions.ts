@@ -15,7 +15,6 @@ export interface MQTTServerOptions extends AedesOptions {
     websocket?: boolean;
     /**
      * Secure server
-     *
      * @default false
      */
     tls?: boolean;

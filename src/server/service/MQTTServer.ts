@@ -1,5 +1,4 @@
-import { Aedes } from 'aedes';
-import * as aedes from 'aedes';
+import * as Aedes from 'aedes';
 import { createServer, Server } from 'net';
 import { createServer as createSecureServer } from 'tls';
 import { MQTTServerOptions } from './MQTTServerOptions';
@@ -47,7 +46,7 @@ export class MQTTServer extends MQTTClient {
     private _onInitServer(): Promise<void> {
         return new Promise((resolve, reject) => {
             const brokerId = `BROKER_${process.pid}_${Math.random().toString(16).substring(2, 8)}`;
-            this.aedes = (aedes as any)({
+            this.aedes = new Aedes({
                 id: brokerId,
                 ...this.options,
             });

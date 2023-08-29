@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import 'mocha';
 import { ModelBuilder, Model, DataFrame, DataObject, CallbackSinkNode, CallbackSourceNode } from '@openhps/core';
 import { MQTTClient, MQTTPushOptions, MQTTServer, MQTTSinkNode, MQTTSourceNode } from '../../../src';
-import { Client, connect } from 'mqtt';
+import { Client, MqttClient, connect } from 'mqtt';
 
 describe('node client', () => {
     describe('remote source', () => {
@@ -179,7 +179,7 @@ describe('node client', () => {
 
         it('should support custom deserializers', (done) => {
             let serverModel: Model<any, any>;
-            let client: Client;
+            let client: MqttClient;
             ModelBuilder.create()
                 .addService(new MQTTServer({
                     port: 1443,
@@ -213,7 +213,7 @@ describe('node client', () => {
 
         it('should support non json data', (done) => {
             let serverModel: Model<any, any>;
-            let client: Client;
+            let client: MqttClient;
             ModelBuilder.create()
                 .addService(new MQTTServer({
                     port: 1443,

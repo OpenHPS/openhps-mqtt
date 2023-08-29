@@ -9,14 +9,14 @@ import {
     SinkNode,
     SourceNode,
 } from '@openhps/core';
-import { Client, connect } from 'mqtt';
+import { MqttClient, connect } from 'mqtt';
 import { MQTTNodeOptions } from '../nodes/MQTTNodeOptions';
 import { MQTTPullOptions } from '../nodes/MQTTPullOptions';
 import { MQTTPushOptions } from '../nodes/MQTTPushOptions';
 import { MQTTClientOptions } from './MQTTClientOptions';
 
 export class MQTTClient extends RemoteService {
-    protected client: Client;
+    protected client: MqttClient;
     protected options: MQTTClientOptions;
     protected topics: Topic[] = [];
 
@@ -59,7 +59,6 @@ export class MQTTClient extends RemoteService {
 
     /**
      * Send a push to a specific remote node
-     *
      * @param {string} uid Remote Node UID
      * @param {DataFrame} frame Data frame to push
      * @param {PushOptions} [options] Push options
@@ -101,7 +100,6 @@ export class MQTTClient extends RemoteService {
 
     /**
      * Send a pull request to a specific remote node
-     *
      * @param {string} uid Remote Node UID
      * @param {PullOptions} [options] Pull options
      * @returns {Promise<void>} Promise of completed pull
@@ -142,7 +140,6 @@ export class MQTTClient extends RemoteService {
 
     /**
      * Send an error to a remote node
-     *
      * @param {string} uid Remote Node UID
      * @param {string} event Event name
      * @param {any[]} [args] Args
@@ -183,7 +180,6 @@ export class MQTTClient extends RemoteService {
 
     /**
      * Send a remote service call
-     *
      * @param {string} uid Service uid
      * @param {string} method Method to call
      * @param {any[]} [args] Optional set of arguments
@@ -382,7 +378,6 @@ export class MQTTClient extends RemoteService {
 
     /**
      * Register a remote client node
-     *
      * @param {RemoteNode<any, any, this>} node Node to register
      * @returns {Promise<void>} Registration promise
      */
@@ -438,7 +433,6 @@ export class MQTTClient extends RemoteService {
 
     /**
      * Register a remote client service
-     *
      * @param {Service} service Service to register
      * @returns {Promise<void>} Registration promise
      */
