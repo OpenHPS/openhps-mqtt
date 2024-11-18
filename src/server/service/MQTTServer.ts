@@ -1,4 +1,4 @@
-import * as Aedes from 'aedes';
+import { default as Aedes } from 'aedes';
 import { createServer, Server } from 'net';
 import { createServer as createSecureServer } from 'tls';
 import { MQTTServerOptions } from './MQTTServerOptions';
