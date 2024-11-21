@@ -95,6 +95,9 @@ export class MQTTClient extends RemoteService {
                     retain: true,
                 },
             );
+            if (!nodeOptions.push.response) {
+                resolve();
+            }
         });
     }
 
@@ -135,6 +138,9 @@ export class MQTTClient extends RemoteService {
                     retain: true,
                 },
             );
+            if (!nodeOptions.pull.response) {
+                resolve();
+            }
         });
     }
 
@@ -175,6 +181,9 @@ export class MQTTClient extends RemoteService {
                     retain: true,
                 },
             );
+            if (!nodeOptions.event.response) {
+                resolve();
+            }
         });
     }
 
