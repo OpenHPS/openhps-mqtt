@@ -9,7 +9,9 @@ import {
     SinkNode,
     SourceNode,
 } from '@openhps/core';
-import { MqttClient, connect } from 'mqtt';
+// mqtt 5's ESM build exports only a default; the named `connect` import resolves
+// through CommonJS interop but leaves the browser bundle with an unresolved binding.
+import mqtt, { MqttClient } from 'mqtt';
 import { MQTTNodeOptions } from '../nodes/MQTTNodeOptions';
 import { MQTTPullOptions } from '../nodes/MQTTPullOptions';
 import { MQTTPushOptions } from '../nodes/MQTTPushOptions';
@@ -35,7 +37,7 @@ export class MQTTClient extends RemoteService {
 
     protected connect(): Promise<void> {
         return new Promise((resolve) => {
-            this.client = connect(this.options.url, this.options);
+            this.client = mqtt.connect(this.options.url, this.options);
             this.client.on('error', (error) => {
                 this.model.logger('error', `Connection error: ${error.message}`, error);
                 this.client?.end();
