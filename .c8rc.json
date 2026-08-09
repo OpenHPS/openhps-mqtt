@@ -1,0 +1,25 @@
+{
+    "all": true,
+    "src": [
+        "src"
+    ],
+    "include": [
+        "src/**/*.ts"
+    ],
+    "exclude": [
+        "test"
+    ],
+    "extension": [
+        ".ts"
+    ],
+    "reporter": [
+        "lcov",
+        "text-summary"
+    ],
+    "report-dir": "./coverage",
+    "check-coverage": true,
+    "branches": 70,
+    "lines": 75,
+    "functions": 90,
+    "statements": 75
+}
