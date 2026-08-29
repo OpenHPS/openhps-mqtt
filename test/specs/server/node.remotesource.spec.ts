@@ -5,19 +5,21 @@ import { MQTTSourceNode } from '../../../src';
 
 describe('node server', () => {
     describe('remote source', () => {
-
         it('should throw an error when building without server', (done) => {
             ModelBuilder.create()
-                .from(new MQTTSourceNode({
-                    uid: "source"
-                }))
+                .from(
+                    new MQTTSourceNode({
+                        uid: 'source',
+                    }),
+                )
                 .to()
-                .build().then(model => {
+                .build()
+                .then((model) => {
                     done(`No error`);
-                }).catch(ex => {
+                })
+                .catch((ex) => {
                     done();
                 });
         });
-
     });
 });

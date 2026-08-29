@@ -5,46 +5,58 @@ import { MQTTClient, MQTTServer, MQTTSinkNode, MQTTSourceNode } from '../../../s
 
 describe('node client', () => {
     describe('remote sink', () => {
-
         it('should build a model without connecting', (done) => {
             let clientModel: Model<any, any>;
             let serverModel: Model<any, any>;
-            
-            ModelBuilder.create()
-                .addService(new MQTTServer({
-                    port: 1443,
-                    websocket: true
-                }))
-                .from(new MQTTSourceNode({
-                    uid: "source"
-                }))
-                .to(new CallbackSinkNode((frame: DataFrame) => {
 
-                }))
-                .build().then(model => {
+            ModelBuilder.create()
+                .addService(
+                    new MQTTServer({
+                        port: 1443,
+                        websocket: true,
+                    }),
+                )
+                .from(
+                    new MQTTSourceNode({
+                        uid: 'source',
+                    }),
+                )
+                .to(new CallbackSinkNode((frame: DataFrame) => {}))
+                .build()
+                .then((model) => {
                     serverModel = model;
                     ModelBuilder.create()
-                        .addService(new MQTTClient({
-                            url: "ws://localhost:1443",
-                        }))
+                        .addService(
+                            new MQTTClient({
+                                url: 'ws://localhost:1443',
+                            }),
+                        )
                         .from()
-                        .to(new MQTTSinkNode({
-                            uid: "source"
-                        }))
-                        .build().then(model => {
+                        .to(
+                            new MQTTSinkNode({
+                                uid: 'source',
+                            }),
+                        )
+                        .build()
+                        .then((model) => {
                             clientModel = model;
                             const frame = new DataFrame();
-                            frame.addObject(new DataObject("abc"));
+                            frame.addObject(new DataObject('abc'));
                             model.push(frame);
-                            clientModel.emitAsync('destroy').then(() => {
-                                return serverModel.emitAsync('destroy');
-                            }).then(() => {
-                                done();
-                            });
-                        }).catch(ex => {
+                            clientModel
+                                .emitAsync('destroy')
+                                .then(() => {
+                                    return serverModel.emitAsync('destroy');
+                                })
+                                .then(() => {
+                                    done();
+                                });
+                        })
+                        .catch((ex) => {
                             done(ex);
                         });
-                }).catch(ex => {
+                })
+                .catch((ex) => {
                     done(ex);
                 });
         }).timeout(5000);
@@ -52,44 +64,61 @@ describe('node client', () => {
         it('should connect to a websocket server', (done) => {
             let clientModel: Model<any, any>;
             let serverModel: Model<any, any>;
-            
+
             ModelBuilder.create()
-                .addService(new MQTTServer({
-                    port: 1443,
-                    websocket: true,
-                }))
-                .from(new MQTTSourceNode({
-                    uid: "source"
-                }))
-                .to(new CallbackSinkNode((frame: DataFrame) => {
-                    expect(frame.getObjects()[0].uid).to.equal("abc");
-                    clientModel.emitAsync('destroy').then(() => {
-                        return serverModel.emitAsync('destroy');
-                    }).then(() => {
-                        done();
-                    });
-                }))
-                .build().then(model => {
+                .addService(
+                    new MQTTServer({
+                        port: 1443,
+                        websocket: true,
+                    }),
+                )
+                .from(
+                    new MQTTSourceNode({
+                        uid: 'source',
+                    }),
+                )
+                .to(
+                    new CallbackSinkNode((frame: DataFrame) => {
+                        expect(frame.getObjects()[0].uid).to.equal('abc');
+                        clientModel
+                            .emitAsync('destroy')
+                            .then(() => {
+                                return serverModel.emitAsync('destroy');
+                            })
+                            .then(() => {
+                                done();
+                            });
+                    }),
+                )
+                .build()
+                .then((model) => {
                     serverModel = model;
                     ModelBuilder.create()
-                        .addService(new MQTTClient({
-                            url: "ws://localhost:1443",
-                        }))
+                        .addService(
+                            new MQTTClient({
+                                url: 'ws://localhost:1443',
+                            }),
+                        )
                         .from()
-                        .to(new MQTTSinkNode({
-                            uid: "source"
-                        }))
-                        .build().then(model => {
+                        .to(
+                            new MQTTSinkNode({
+                                uid: 'source',
+                            }),
+                        )
+                        .build()
+                        .then((model) => {
                             setTimeout(() => {
                                 clientModel = model;
                                 const frame = new DataFrame();
-                                frame.addObject(new DataObject("abc"));
+                                frame.addObject(new DataObject('abc'));
                                 clientModel.push(frame);
                             }, 1000);
-                        }).catch(ex => {
+                        })
+                        .catch((ex) => {
                             done(ex);
                         });
-                }).catch(ex => {
+                })
+                .catch((ex) => {
                     done(ex);
                 });
         }).timeout(5000);
@@ -99,37 +128,54 @@ describe('node client', () => {
             let serverModel: Model<any, any>;
 
             ModelBuilder.create()
-                .addService(new MQTTServer({
-                    port: 1443
-                }))
-                .from(new MQTTSourceNode({
-                    uid: "source"
-                }))
+                .addService(
+                    new MQTTServer({
+                        port: 1443,
+                    }),
+                )
+                .from(
+                    new MQTTSourceNode({
+                        uid: 'source',
+                    }),
+                )
                 .to()
-                .build().then(model => {
+                .build()
+                .then((model) => {
                     serverModel = model;
                     ModelBuilder.create()
-                        .addService(new MQTTClient({
-                            url: "mqtt://localhost:1443",
-                        }))
-                        .from(new CallbackSourceNode(() => {
-                            clientModel.emitAsync('destroy').then(() => {
-                                return serverModel.emitAsync('destroy');
-                            }).then(() => {
-                                done();
-                            });
-                            return null;
-                        }))
-                        .to(new MQTTSinkNode({
-                            uid: "source"
-                        }))
-                        .build().then(model => {
+                        .addService(
+                            new MQTTClient({
+                                url: 'mqtt://localhost:1443',
+                            }),
+                        )
+                        .from(
+                            new CallbackSourceNode(() => {
+                                clientModel
+                                    .emitAsync('destroy')
+                                    .then(() => {
+                                        return serverModel.emitAsync('destroy');
+                                    })
+                                    .then(() => {
+                                        done();
+                                    });
+                                return null;
+                            }),
+                        )
+                        .to(
+                            new MQTTSinkNode({
+                                uid: 'source',
+                            }),
+                        )
+                        .build()
+                        .then((model) => {
                             clientModel = model;
                             Promise.resolve(serverModel.pull());
-                        }).catch(ex => {
+                        })
+                        .catch((ex) => {
                             done(ex);
                         });
-                }).catch(ex => {
+                })
+                .catch((ex) => {
                     done(ex);
                 });
         }).timeout(5000);
