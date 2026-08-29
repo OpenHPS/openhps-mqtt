@@ -1,0 +1,213 @@
+<!DOCTYPE html><html class="default" lang="en" data-base="../"><head><meta charset="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>MQTTServerOptions | @openhps/mqtt</title><meta name="description" content="Documentation for @openhps/mqtt"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="../assets/style.css"/><link rel="stylesheet" href="../assets/highlight.css"/><script defer src="../assets/main.js"></script><script async src="../assets/icons.js" id="tsd-icons-script"></script><script async src="../assets/search.js" id="tsd-search-script"></script><script async src="../assets/navigation.js" id="tsd-nav-script"></script><script async src="../assets/hierarchy.js" id="tsd-hierarchy-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os";document.body.style.display="none";setTimeout(() => window.app?app.showPage():document.body.style.removeProperty("display"),500)</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container"><a href="../index.html" class="title">@openhps/mqtt</a>
+<div id="tsd-toolbar-links"></div><button id="tsd-search-trigger" class="tsd-widget" aria-label="Search"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-search"></use></svg></button><dialog id="tsd-search" aria-label="Search"><input role="combobox" id="tsd-search-input" aria-controls="tsd-search-results" aria-autocomplete="list" aria-expanded="true" autocapitalize="off" autocomplete="off" placeholder="Search the docs" maxLength="100"/>
+<ul role="listbox" id="tsd-search-results"></ul>
+<div id="tsd-search-status" aria-live="polite" aria-atomic="true">
+<div>Preparing search index...</div></div></dialog><a href="#" class="tsd-widget menu" id="tsd-toolbar-menu-trigger" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-menu"></use></svg></a></div></header>
+<div class="container container-main">
+<div class="col-content">
+<div class="tsd-page-title">
+<ul class="tsd-breadcrumb" aria-label="Breadcrumb">
+<li><a href="" aria-current="page">MQTTServerOptions</a></li></ul>
+<h1>Interface MQTTServerOptions</h1></div>
+<div class="tsd-signature"><span class="tsd-signature-keyword">interface</span> <span class="tsd-kind-interface">MQTTServerOptions</span> <span class="tsd-signature-symbol">{</span><br/>    <a class="tsd-kind-property" href="#authenticate">authenticate</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">AuthenticateHandler</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#authorizeforward">authorizeForward</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">AuthorizeForwardHandler</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#authorizepublish">authorizePublish</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">AuthorizePublishHandler</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#authorizesubscribe">authorizeSubscribe</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">AuthorizeSubscribeHandler</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#cert">cert</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#concurrency">concurrency</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#connecttimeout">connectTimeout</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#heartbeatinterval">heartbeatInterval</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#id">id</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#keepalivelimit">keepaliveLimit</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#key">key</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#maxclientsidlength">maxClientsIdLength</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#mq">mq</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#persistence">persistence</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#port">port</a><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#preconnect">preConnect</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">PreConnectHandler</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#prefix">prefix</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#published">published</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">PublishedHandler</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#queuelimit">queueLimit</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#tls">tls</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/>    <a class="tsd-kind-property" href="#websocket">websocket</a><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">;</span><br/><span class="tsd-signature-symbol">}</span></div>
+<section class="tsd-panel tsd-hierarchy" data-refl="1153">
+<h4>Hierarchy</h4>
+<ul class="tsd-hierarchy">
+<li class="tsd-hierarchy-item"><span class="tsd-signature-type">AedesOptions</span>
+<ul class="tsd-hierarchy">
+<li class="tsd-hierarchy-item"><span class="tsd-hierarchy-target">MQTTServerOptions</span></li></ul></li></ul></section><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/OpenHPS/openhps-mqtt/blob/da2f111b93823eaa5f432146a500b4713de82708/src/server/service/MQTTServerOptions.ts#L3">src/server/service/MQTTServerOptions.ts:3</a></li></ul></aside>
+<section class="tsd-panel-group tsd-index-group">
+<section class="tsd-panel tsd-index-panel">
+<details class="tsd-index-content tsd-accordion" open><summary class="tsd-accordion-summary tsd-index-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h5 class="tsd-index-heading uppercase">Index</h5></summary>
+<div class="tsd-accordion-details">
+<section class="tsd-index-section">
+<h3 class="tsd-index-heading tsd-anchor-link" id="properties">Properties<a href="#properties" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-index-list"><a href="#authenticate" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>authenticate?</span></a>
+<a href="#authorizeforward" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>authorize<wbr/>Forward?</span></a>
+<a href="#authorizepublish" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>authorize<wbr/>Publish?</span></a>
+<a href="#authorizesubscribe" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>authorize<wbr/>Subscribe?</span></a>
+<a href="#cert" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>cert?</span></a>
+<a href="#concurrency" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>concurrency?</span></a>
+<a href="#connecttimeout" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>connect<wbr/>Timeout?</span></a>
+<a href="#heartbeatinterval" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>heartbeat<wbr/>Interval?</span></a>
+<a href="#id" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>id?</span></a>
+<a href="#keepalivelimit" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>keepalive<wbr/>Limit?</span></a>
+<a href="#key" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>key?</span></a>
+<a href="#maxclientsidlength" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>max<wbr/>Clients<wbr/>Id<wbr/>Length?</span></a>
+<a href="#mq" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>mq?</span></a>
+<a href="#persistence" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>persistence?</span></a>
+<a href="#port" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>port</span></a>
+<a href="#preconnect" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>pre<wbr/>Connect?</span></a>
+<a href="#prefix" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>prefix?</span></a>
+<a href="#published" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>published?</span></a>
+<a href="#queuelimit" class="tsd-index-link tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>queue<wbr/>Limit?</span></a>
+<a href="#tls" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>tls?</span></a>
+<a href="#websocket" class="tsd-index-link"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>websocket?</span></a>
+</div></section></div></details></section></section>
+<details class="tsd-panel-group tsd-member-group tsd-accordion" open><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h2 class="tsd-anchor-link" id="properties-1">Properties<a href="#properties-1" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h2></summary>
+<section>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
+<h3 class="tsd-anchor-link" id="authenticate"><code class="tsd-tag">Optional</code><span>authenticate</span><a href="#authenticate" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">authenticate</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">AuthenticateHandler</span></div><aside class="tsd-sources">
+<p>Inherited from AedesOptions.authenticate</p>
+<ul>
+<li>Defined in node_modules/aedes/types/instance.d.ts:82</li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
+<h3 class="tsd-anchor-link" id="authorizeforward"><code class="tsd-tag">Optional</code><span>authorize<wbr/>Forward</span><a href="#authorizeforward" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">authorizeForward</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">AuthorizeForwardHandler</span></div><aside class="tsd-sources">
+<p>Inherited from AedesOptions.authorizeForward</p>
+<ul>
+<li>Defined in node_modules/aedes/types/instance.d.ts:85</li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
+<h3 class="tsd-anchor-link" id="authorizepublish"><code class="tsd-tag">Optional</code><span>authorize<wbr/>Publish</span><a href="#authorizepublish" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">authorizePublish</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">AuthorizePublishHandler</span></div><aside class="tsd-sources">
+<p>Inherited from AedesOptions.authorizePublish</p>
+<ul>
+<li>Defined in node_modules/aedes/types/instance.d.ts:83</li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
+<h3 class="tsd-anchor-link" id="authorizesubscribe"><code class="tsd-tag">Optional</code><span>authorize<wbr/>Subscribe</span><a href="#authorizesubscribe" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">authorizeSubscribe</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">AuthorizeSubscribeHandler</span></div><aside class="tsd-sources">
+<p>Inherited from AedesOptions.authorizeSubscribe</p>
+<ul>
+<li>Defined in node_modules/aedes/types/instance.d.ts:84</li></ul></aside></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="cert"><code class="tsd-tag">Optional</code><span>cert</span><a href="#cert" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">cert</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Buffer</span></div>
+<div class="tsd-comment tsd-typography"><p>Server certification (requires tls=true)</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/OpenHPS/openhps-mqtt/blob/da2f111b93823eaa5f432146a500b4713de82708/src/server/service/MQTTServerOptions.ts#L28">src/server/service/MQTTServerOptions.ts:28</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
+<h3 class="tsd-anchor-link" id="concurrency"><code class="tsd-tag">Optional</code><span>concurrency</span><a href="#concurrency" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">concurrency</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
+<p>Inherited from AedesOptions.concurrency</p>
+<ul>
+<li>Defined in node_modules/aedes/types/instance.d.ts:75</li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
+<h3 class="tsd-anchor-link" id="connecttimeout"><code class="tsd-tag">Optional</code><span>connect<wbr/>Timeout</span><a href="#connecttimeout" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">connectTimeout</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
+<p>Inherited from AedesOptions.connectTimeout</p>
+<ul>
+<li>Defined in node_modules/aedes/types/instance.d.ts:77</li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
+<h3 class="tsd-anchor-link" id="heartbeatinterval"><code class="tsd-tag">Optional</code><span>heartbeat<wbr/>Interval</span><a href="#heartbeatinterval" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">heartbeatInterval</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
+<p>Inherited from AedesOptions.heartbeatInterval</p>
+<ul>
+<li>Defined in node_modules/aedes/types/instance.d.ts:76</li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
+<h3 class="tsd-anchor-link" id="id"><code class="tsd-tag">Optional</code><span>id</span><a href="#id" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">id</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div><aside class="tsd-sources">
+<p>Inherited from AedesOptions.id</p>
+<ul>
+<li>Defined in node_modules/aedes/types/instance.d.ts:73</li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
+<h3 class="tsd-anchor-link" id="keepalivelimit"><code class="tsd-tag">Optional</code><span>keepalive<wbr/>Limit</span><a href="#keepalivelimit" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">keepaliveLimit</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
+<p>Inherited from AedesOptions.keepaliveLimit</p>
+<ul>
+<li>Defined in node_modules/aedes/types/instance.d.ts:78</li></ul></aside></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="key"><code class="tsd-tag">Optional</code><span>key</span><a href="#key" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">key</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">Buffer</span></div>
+<div class="tsd-comment tsd-typography"><p>Server private key (requires tls=true)</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/OpenHPS/openhps-mqtt/blob/da2f111b93823eaa5f432146a500b4713de82708/src/server/service/MQTTServerOptions.ts#L24">src/server/service/MQTTServerOptions.ts:24</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
+<h3 class="tsd-anchor-link" id="maxclientsidlength"><code class="tsd-tag">Optional</code><span>max<wbr/>Clients<wbr/>Id<wbr/>Length</span><a href="#maxclientsidlength" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">maxClientsIdLength</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
+<p>Inherited from AedesOptions.maxClientsIdLength</p>
+<ul>
+<li>Defined in node_modules/aedes/types/instance.d.ts:80</li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
+<h3 class="tsd-anchor-link" id="mq"><code class="tsd-tag">Optional</code><span>mq</span><a href="#mq" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">mq</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">any</span></div><aside class="tsd-sources">
+<p>Inherited from AedesOptions.mq</p>
+<ul>
+<li>Defined in node_modules/aedes/types/instance.d.ts:72</li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
+<h3 class="tsd-anchor-link" id="persistence"><code class="tsd-tag">Optional</code><span>persistence</span><a href="#persistence" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">persistence</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">any</span></div><aside class="tsd-sources">
+<p>Inherited from AedesOptions.persistence</p>
+<ul>
+<li>Defined in node_modules/aedes/types/instance.d.ts:74</li></ul></aside></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="port"><span>port</span><a href="#port" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">port</span><span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+<div class="tsd-comment tsd-typography"><p>Server port</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/OpenHPS/openhps-mqtt/blob/da2f111b93823eaa5f432146a500b4713de82708/src/server/service/MQTTServerOptions.ts#L11">src/server/service/MQTTServerOptions.ts:11</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
+<h3 class="tsd-anchor-link" id="preconnect"><code class="tsd-tag">Optional</code><span>pre<wbr/>Connect</span><a href="#preconnect" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">preConnect</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">PreConnectHandler</span></div><aside class="tsd-sources">
+<p>Inherited from AedesOptions.preConnect</p>
+<ul>
+<li>Defined in node_modules/aedes/types/instance.d.ts:81</li></ul></aside></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="prefix"><code class="tsd-tag">Optional</code><span>prefix</span><a href="#prefix" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">prefix</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">string</span></div>
+<div class="tsd-comment tsd-typography"><p>Topic prefix</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/OpenHPS/openhps-mqtt/blob/da2f111b93823eaa5f432146a500b4713de82708/src/server/service/MQTTServerOptions.ts#L7">src/server/service/MQTTServerOptions.ts:7</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
+<h3 class="tsd-anchor-link" id="published"><code class="tsd-tag">Optional</code><span>published</span><a href="#published" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">published</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">PublishedHandler</span></div><aside class="tsd-sources">
+<p>Inherited from AedesOptions.published</p>
+<ul>
+<li>Defined in node_modules/aedes/types/instance.d.ts:86</li></ul></aside></section>
+<section class="tsd-panel tsd-member tsd-is-inherited tsd-is-external">
+<h3 class="tsd-anchor-link" id="queuelimit"><code class="tsd-tag">Optional</code><span>queue<wbr/>Limit</span><a href="#queuelimit" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">queueLimit</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">number</span></div><aside class="tsd-sources">
+<p>Inherited from AedesOptions.queueLimit</p>
+<ul>
+<li>Defined in node_modules/aedes/types/instance.d.ts:79</li></ul></aside></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="tls"><code class="tsd-tag">Optional</code><span>tls</span><a href="#tls" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">tls</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
+<div class="tsd-comment tsd-typography"><p>Secure server</p>
+</div>
+<div class="tsd-comment tsd-typography">
+<div class="tsd-tag-default">
+<h4 class="tsd-anchor-link" id="default">Default<a href="#default" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h4><pre><code class="ts"><span class="hl-3">false</span>
+</code><button type="button">Copy</button></pre>
+
+</div></div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/OpenHPS/openhps-mqtt/blob/da2f111b93823eaa5f432146a500b4713de82708/src/server/service/MQTTServerOptions.ts#L20">src/server/service/MQTTServerOptions.ts:20</a></li></ul></aside></section>
+<section class="tsd-panel tsd-member">
+<h3 class="tsd-anchor-link" id="websocket"><code class="tsd-tag">Optional</code><span>websocket</span><a href="#websocket" aria-label="Permalink" class="tsd-anchor-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="../assets/icons.svg#icon-anchor"></use></svg></a></h3>
+<div class="tsd-signature"><span class="tsd-kind-property">websocket</span><span class="tsd-signature-symbol">?:</span> <span class="tsd-signature-type">boolean</span></div>
+<div class="tsd-comment tsd-typography"><p>MQTT over websocket connection</p>
+</div><aside class="tsd-sources">
+<ul>
+<li>Defined in <a href="https://github.com/OpenHPS/openhps-mqtt/blob/da2f111b93823eaa5f432146a500b4713de82708/src/server/service/MQTTServerOptions.ts#L15">src/server/service/MQTTServerOptions.ts:15</a></li></ul></aside></section></section></details></div>
+<div class="col-sidebar">
+<div class="page-menu">
+<div class="tsd-navigation settings">
+<details class="tsd-accordion"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>Settings</h3></summary>
+<div class="tsd-accordion-details">
+<div class="tsd-filter-visibility"><span class="settings-label">Member Visibility</span>
+<ul id="tsd-filter-options">
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></div>
+<div class="tsd-theme-toggle"><label class="settings-label" for="tsd-theme">Theme</label><select id="tsd-theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div>
+<details open class="tsd-accordion tsd-page-navigation"><summary class="tsd-accordion-summary"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>
+<h3>On This Page</h3></summary>
+<div class="tsd-accordion-details">
+<details open class="tsd-accordion tsd-page-navigation-section"><summary class="tsd-accordion-summary" data-key="section-Properties"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><use href="../assets/icons.svg#icon-chevronDown"></use></svg>Properties</summary>
+<div><a href="#authenticate" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>authenticate</span></a><a href="#authorizeforward" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>authorize<wbr/>Forward</span></a><a href="#authorizepublish" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>authorize<wbr/>Publish</span></a><a href="#authorizesubscribe" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>authorize<wbr/>Subscribe</span></a><a href="#cert"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>cert</span></a><a href="#concurrency" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>concurrency</span></a><a href="#connecttimeout" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>connect<wbr/>Timeout</span></a><a href="#heartbeatinterval" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>heartbeat<wbr/>Interval</span></a><a href="#id" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>id</span></a><a href="#keepalivelimit" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>keepalive<wbr/>Limit</span></a><a href="#key"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>key</span></a><a href="#maxclientsidlength" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>max<wbr/>Clients<wbr/>Id<wbr/>Length</span></a><a href="#mq" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>mq</span></a><a href="#persistence" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>persistence</span></a><a href="#port"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>port</span></a><a href="#preconnect" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>pre<wbr/>Connect</span></a><a href="#prefix"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>prefix</span></a><a href="#published" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>published</span></a><a href="#queuelimit" class="tsd-is-inherited tsd-is-external"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>queue<wbr/>Limit</span></a><a href="#tls"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>tls</span></a><a href="#websocket"><svg class="tsd-kind-icon" viewBox="0 0 24 24" aria-label="Property"><use href="../assets/icons.svg#icon-1024"></use></svg><span>websocket</span></a></div></details></div></details></div>
+<div class="site-menu">
+<nav class="tsd-navigation"><a href="../modules.html">@openhps/mqtt</a>
+<ul class="tsd-small-nested-navigation" id="tsd-nav-container">
+<li>Loading...</li></ul></nav></div></div></div><footer></footer>
+<div class="overlay"></div></body></html>
