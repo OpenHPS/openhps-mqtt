@@ -1,4 +1,4 @@
-import { default as Aedes } from 'aedes';
+import { Aedes } from 'aedes';
 import { createServer, Server } from 'net';
 import { createServer as createSecureServer } from 'tls';
 import { MQTTServerOptions } from './MQTTServerOptions';
@@ -43,13 +43,17 @@ export class MQTTServer extends MQTTClient {
         this.once('destroy', this._onDestroy.bind(this));
     }
 
-    private _onInitServer(): Promise<void> {
+    private async _onInitServer(): Promise<void> {
+        const brokerId = `BROKER_${process.pid}_${Math.random().toString(16).substring(2, 8)}`;
+        // aedes 1 removed the default export and made broker construction asynchronous.
+        // createBroker() is `new Aedes(opts)` followed by `await listen()`, and it is
+        // listen() that installs the persistence layer -- a bare `new Aedes()` leaves
+        // `persistence` unset.
+        this.aedes = await Aedes.createBroker({
+            id: brokerId,
+            ...this.options,
+        });
         return new Promise((resolve, reject) => {
-            const brokerId = `BROKER_${process.pid}_${Math.random().toString(16).substring(2, 8)}`;
-            this.aedes = new Aedes({
-                id: brokerId,
-                ...this.options,
-            });
             this.aedes.on('subscribe', (subscriptions, client) => {
                 this.model.logger(
                     'info',
