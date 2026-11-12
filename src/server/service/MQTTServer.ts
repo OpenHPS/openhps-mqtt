@@ -36,7 +36,8 @@ export class MQTTServer extends MQTTClient {
         }
 
         this.options.url =
-            (this.options.websocket ? `ws${this.options.tls ? 's' : ''}://` : `mqtt://`) + `localhost:${options.port}`;
+            (this.options.websocket ? `ws${this.options.tls ? 's' : ''}://` : `mqtt://`) +
+            `localhost:${this.options.port}`;
 
         this.removeAllListeners('build');
         this.once('build', this._onInitServer.bind(this));
@@ -82,7 +83,7 @@ export class MQTTServer extends MQTTClient {
                 } else {
                     this.server = createServerHTTP();
                 }
-                const wss = new WebSocket.Server({ server: this.server as HTTPServer | HTTPServer });
+                const wss = new WebSocket.Server({ server: this.server as HTTPSServer | HTTPServer });
                 wss.on('connection', (ws) => {
                     const duplex = WebSocket.createWebSocketStream(ws);
                     this.aedes.handle(duplex);
@@ -105,6 +106,7 @@ export class MQTTServer extends MQTTClient {
             this.model.logger('debug', `Starting server on port ${this.options.port}: ${brokerId} ...`);
             this.server.on('error', (error: Error) => {
                 this.model.logger('error', error.message);
+                reject(error);
             });
             this.server.on('listening', () => {
                 this.model.logger('info', `Server listening on port ${this.options.port}: ${brokerId}`);
