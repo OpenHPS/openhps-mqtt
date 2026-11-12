@@ -24,57 +24,74 @@
 <br />
 
 ## Getting Started
+
 If you have [npm installed](https://www.npmjs.com/get-npm), start using @openhps/mqtt with the following command.
+
 ```bash
 npm install @openhps/mqtt --save
 ```
 
 ## Usage
+
 The MQTT module uses a broker for all communication. You can use the embedded MQTT server or use an external broker.
 
 ### Embedded MQTT Server
+
 Using the embedded MQTT server will use [Aedes](https://github.com/moscajs/aedes) as the broker. For more production
 ready deployments using a dedicated broker is recommended.
+
 ```typescript
 ModelBuilder.create()
-    .addService(new MQTTServer({
-        port: 1443          // MQTT port
-    }))
-    .from(new MQTTSourceNode({
-        uid: "source"
-    }))
+    .addService(
+        new MQTTServer({
+            port: 1443, // MQTT port
+        }),
+    )
+    .from(
+        new MQTTSourceNode({
+            uid: 'source',
+        }),
+    )
     .to()
     .build();
 ```
 
 ### Client Example
+
 ```typescript
 ModelBuilder.create()
-    .addService(new MQTTClient({
-        url: "mqtt://localhost:1443",
-    }))
+    .addService(
+        new MQTTClient({
+            url: 'mqtt://localhost:1443',
+        }),
+    )
     .from(/* ... */)
-    .to(new MQTTSinkNode({
-        uid: "source"
-    }))
+    .to(
+        new MQTTSinkNode({
+            uid: 'source',
+        }),
+    )
     .build();
 ```
 
 ### External MQTT Server
+
 You can set up multiple clients connecting to an external MQTT server.
 The API is exactly the same as the client example.
 
 ## Protocol
 
-|**Topic**|**Description**|
-|-|-|
-|\<uid\>/push|Topic to push to a node with a certain \<uid\>|
-|\<uid\>/pull|Topic to pull from a node with a certain \<uid\>|
-|\<uid\>/events/error|Topic to publish errors to a node with a certain \<uid\>|
-|\<uid\>/events/completed|Topic to publish completed event to a node with a certain \<uid\>|
+| **Topic**                | **Description**                                                   |
+| ------------------------ | ----------------------------------------------------------------- |
+| \<uid\>/push             | Topic to push to a node with a certain \<uid\>                    |
+| \<uid\>/pull             | Topic to pull from a node with a certain \<uid\>                  |
+| \<uid\>/events/error     | Topic to publish errors to a node with a certain \<uid\>          |
+| \<uid\>/events/completed | Topic to publish completed event to a node with a certain \<uid\> |
 
 **Note:** A prefix an be added to the topics in case the broker is used for multiple positioning systems.
+
 ### Push Payload
+
 ```json
 {
     "frame": {
@@ -87,6 +104,7 @@ The API is exactly the same as the client example.
 ```
 
 ### Pull Payload
+
 ```json
 {
     "options": {
@@ -96,6 +114,7 @@ The API is exactly the same as the client example.
 ```
 
 ### Event Payload
+
 ```json
 {
     // ...
@@ -103,21 +122,24 @@ The API is exactly the same as the client example.
 ```
 
 ### Browser Usage
+
 The following compiled files are provided for browser usage:
+
 - openhps-mqtt.js: CJS version. Requires (openhps-core.js in same directory)
 - openhps-mqtt.min.js: Minified CJS version. Requires (openhps-core.min.js in same directory)
 - openhps-mqtt.es.js: ESM version. Requires (openhps-core.es.js in same directory)
 - openhps-mqtt.es.min.js: Minified ESM version. Requires (openhps-core.es.min.js in same directory)
 
 ## Contributors
-The framework is open source and is mainly developed by PhD Student Maxim Van de Wynckel as part of his research towards *Hybrid Positioning and Implicit Human-Computer Interaction* under the supervision of Prof. Dr. Beat Signer.
 
-Maintained by [MVdW-Software](https://mvdw-software.com).
+The framework is open source and was developed as part of the PhD of Maxim Van de Wynckel under the supervision of Prof. Dr. Beat Signer. It is currently maintained by [MVdW-Software](https://mvdw-software.com).
 
 ## Contributing
+
 Use of OpenHPS, contributions and feedback is highly appreciated. Please read our [contributing guidelines](https://github.com/OpenHPS/.github/blob/HEAD/CONTRIBUTING.md) for more information.
 
 ## License
+
 Copyright (C) 2019-2024 Maxim Van de Wynckel & Vrije Universiteit Brussel
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
